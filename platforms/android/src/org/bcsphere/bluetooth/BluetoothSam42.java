@@ -838,7 +838,6 @@ public class BluetoothSam42 implements IBluetooth {
         public void onCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(characteristic, status);
             Log.i(TAG, "onCharacteristicWrite");
-            String deviceID = getDeviceID(characteristic.getService());
             CallbackContext callbackContext = mapWriteValueCallBack.get(characteristic);
             if (callbackContext != null) {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -939,7 +938,6 @@ public class BluetoothSam42 implements IBluetooth {
         public void onDescriptorWrite(BluetoothGattDescriptor descriptor, int status) {
             super.onDescriptorWrite(descriptor, status);
             Log.i(TAG, "onDescriptorWrite");
-            String deviceID = getDeviceID(descriptor.getCharacteristic().getService());
             CallbackContext writeValueCallbackContext = null;
             if (mapWriteValueCallBack != null) {
                 writeValueCallbackContext = mapWriteValueCallBack.get(descriptor);
