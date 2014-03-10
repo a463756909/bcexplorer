@@ -28,6 +28,10 @@
             <uses-permission android:name="android.permission.BLUETOOTH"/>
             <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
         </config-file>
+		
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <uses-library android:name="com.htc.android.bluetooth.le" android:required="false" />
+        </config-file>
 
         <source-file src="src/android/org/bcsphere/bluetooth/BCBluetooth.java" target-dir="src/org/bcsphere/bluetooth" />
 		<source-file src="src/android/org/bcsphere/bluetooth/IBluetooth.java" target-dir="src/org/bcsphere/bluetooth" />
@@ -40,7 +44,6 @@
 		<source-file src="src/underscore.js" target-dir="assets/www" />
 		
 		<source-file src="libs/samsung_ble_sdk_200.jar" target-dir="libs" />
-
     </platform>
    
 
