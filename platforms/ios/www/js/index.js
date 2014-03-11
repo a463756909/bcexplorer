@@ -147,9 +147,11 @@ var app = {
 	
 	connectDevice: function(){
 		app.showLoader("Connecting and discovering services...");
-		app.device.connect(app.connectSuccess);
+		app.device.connect(app.connectSuccess,app.connectError);
 	},
-	
+    connectError: function(){
+        app.hideLoader();
+    },
 	connectSuccess: function(message){
 		$("#device_operation").show();
 		$("#disconnect").show();
