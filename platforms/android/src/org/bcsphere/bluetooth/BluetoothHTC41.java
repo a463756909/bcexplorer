@@ -72,6 +72,7 @@ public class BluetoothHTC41 implements IBluetooth {
         bluetoothClientProfile = new BluetoothClientProfile(context);
         bluetoothClientProfile.initServices();
         localIntentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        localIntentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         localIntentFilter.addAction(BleAdapter.ACTION_UUID);
         context.registerReceiver(mReceiver, localIntentFilter);
     }
@@ -551,7 +552,8 @@ public class BluetoothHTC41 implements IBluetooth {
             String descriptorValue = Tools.getData(jsonDescriptors, k, Tools.DESCRIPTOR_VALUE);
             String descriptorUUID = Tools.getData(jsonDescriptors, k, Tools.DESCRIPTOR_UUID);
             String descriptorValueType = Tools.getData(jsonDescriptors, k, Tools.DESCRIPTOR_VALUE_TYPE);
-            int descriptorsPermission = Tools.encodePermission(Tools.getArray(jsonDescriptors, k,Tools.DESCRIPTOR_PERMISSION));
+            int descriptorsPermission = Tools.encodePermission(Tools.getArray(jsonDescriptors, k,
+                    Tools.DESCRIPTOR_PERMISSION));
             byte[] value = Tools.parsingCodingFormat(descriptorValue, descriptorValueType);
             BleDescriptor bleDescriptor = new BleDescriptor(new BleGattID(descriptorUUID));
             bleDescriptor.setHandle(k);
@@ -755,6 +757,8 @@ public class BluetoothHTC41 implements IBluetooth {
                         mapRssiData.put(deviceID, RSSI);
                     }
                 }
+            }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
+                Log.i(TAG, "ACTION_DISCOVERY_FINISHED");
             }
         }
     };
@@ -846,7 +850,7 @@ public class BluetoothHTC41 implements IBluetooth {
             String deviceID = device.getAddress();
             Log.i(TAG, "device: " + deviceID + " disconnect!");
             CallbackContext callbackContext = null;
-            if(mapDisconnectCallBack != null){
+            if (mapDisconnectCallBack != null) {
                 callbackContext = mapDisconnectCallBack.get(deviceID);
             }
             if (callbackContext == null && mapAddListenerCallBack != null) {
