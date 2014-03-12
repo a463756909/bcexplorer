@@ -153,12 +153,12 @@
 			fireBLEEvent("devicedisconnected",arg.deviceID);
 		});
 		BC.bluetooth.addListener('onsubscribe', function(arg){
-			var service = getServiceByUniqueID(BC.bluetooth.services,arg.uniqueID);
+			var service = BC.bluetooth.services[arg.uniqueID];
 			service.characteristics[arg.characteristicIndex].isSubscribed = true;
 			fireBLEEvent("onsubscribestatechange",null,null,arg.characteristicIndex,null,arg.uniqueID);
 		});
 		BC.bluetooth.addListener('onunsubscribe', function(arg){
-			var service = getServiceByUniqueID(BC.bluetooth.services,arg.uniqueID);
+			var service = BC.bluetooth.services[arg.uniqueID];
 			service.characteristics[arg.characteristicIndex].isSubscribed = false;
 			fireBLEEvent("onsubscribestatechange",null,null,arg.characteristicIndex,null,arg.uniqueID);
 		});
