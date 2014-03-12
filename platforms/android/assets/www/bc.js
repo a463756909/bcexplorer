@@ -403,29 +403,7 @@
 		this.notify = this.bluetoothFuncs.notify;
 		
 		this.bluetoothFuncs.initBluetooth();
-		
-		/** 
-		 * @memberof Bluetooth
-		 * @method 
-		 * @example 
-		 * //Gets service by uniqueID
-		 * onSubscribeSateChange : function(arg){
-		 * 	var service = BC.bluetooth.getServiceByUniqueID(arg.uniqueID);
-		 * }
-		 * @param {string} uniqueID - The uniqueID of service
-		 * @returns {Service} Service
-		 */
-		this.getServiceByUniqueID = function(uniqueID){
-			var unqueID = uniqueID.toLowerCase();
-			_.each(this.services, function(service){
-					if(service.uuid == uuid_128){
-						return service;
-					}
-				}
-			);
-			return null;
-		}
-		
+
 		/**
 		 * @property {object}  defaults               - The default values for parties.
 		 */
@@ -564,9 +542,8 @@
 	 */
 	var AddService = BC.Bluetooth.AddService = function(service,success,error){
 		var serviceObj = serializeService(service);
-		var self = this;
 		BC.bluetooth.addServices(serviceObj,function(){
-			self.services.push(service);
+			BC.bluetooth.services[service.uniqueID] = service;
 			success();
 		},function(){
 			error();

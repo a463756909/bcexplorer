@@ -89,7 +89,7 @@ var app = {
 	},
 	
 	onSubscribeSateChange : function(arg){
-		var service = BC.bluetooth.getServiceByUniqueID(arg.uniqueID);
+		var service = BC.bluetooth.services[arg.uniqueID];
 		var character = service.characteristics[arg.characteristicIndex];
 		var interval_notify_index = null;
 		if(character.isSubscribed){		
