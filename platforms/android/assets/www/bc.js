@@ -153,12 +153,12 @@
 			fireBLEEvent("devicedisconnected",arg.deviceID);
 		});
 		BC.bluetooth.addListener('onsubscribe', function(arg){
-			var service = getServiceByUniqueID(BC.bluetooth.services,arg.uniqueID);
+			var service = BC.bluetooth.services[arg.uniqueID];
 			service.characteristics[arg.characteristicIndex].isSubscribed = true;
 			fireBLEEvent("onsubscribestatechange",null,null,arg.characteristicIndex,null,arg.uniqueID);
 		});
 		BC.bluetooth.addListener('onunsubscribe', function(arg){
-			var service = getServiceByUniqueID(BC.bluetooth.services,arg.uniqueID);
+			var service = BC.bluetooth.services[arg.uniqueID];
 			service.characteristics[arg.characteristicIndex].isSubscribed = false;
 			fireBLEEvent("onsubscribestatechange",null,null,arg.characteristicIndex,null,arg.uniqueID);
 		});
@@ -403,29 +403,7 @@
 		this.notify = this.bluetoothFuncs.notify;
 		
 		this.bluetoothFuncs.initBluetooth();
-		
-		/** 
-		 * @memberof Bluetooth
-		 * @method 
-		 * @example 
-		 * //Gets service by uniqueID
-		 * onSubscribeSateChange : function(arg){
-		 * 	var service = BC.bluetooth.getServiceByUniqueID(arg.uniqueID);
-		 * }
-		 * @param {string} uniqueID - The uniqueID of service
-		 * @returns {Service} Service
-		 */
-		this.getServiceByUniqueID = function(uniqueID){
-			var unqueID = uniqueID.toLowerCase();
-			_.each(this.services, function(service){
-					if(service.uuid == uuid_128){
-						return service;
-					}
-				}
-			);
-			return null;
-		}
-		
+
 		/**
 		 * @property {object}  defaults               - The default values for parties.
 		 */
@@ -564,9 +542,8 @@
 	 */
 	var AddService = BC.Bluetooth.AddService = function(service,success,error){
 		var serviceObj = serializeService(service);
-		var self = this;
 		BC.bluetooth.addServices(serviceObj,function(){
-			self.services.push(service);
+			BC.bluetooth.services[service.uniqueID] = service;
 			success();
 		},function(){
 			error();
@@ -589,7 +566,12 @@
 	 * @param {function} [error] - Error callback
 	 */
 	var RemoveService = BC.Bluetooth.RemoveService = function(service,success,error){
-		BC.bluetooth.removeService(service,success,error);
+		BC.bluetooth.removeService(service,function(){
+			delete BC.bluetooth.services[service.uniqueID];
+			success();
+		},function(){
+			error();
+		});
 	};
 	/** 
 	 * Starts a scan for Bluetooth LE devices, looking for devices with given services.
