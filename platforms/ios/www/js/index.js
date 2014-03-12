@@ -13,7 +13,8 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-var services= [];
+var serviceUniqueID = "";
+var interval_notify_index = "";
 var app = {
 
     // Application Constructor
@@ -28,6 +29,11 @@ var app = {
 		document.addEventListener('devicedisconnected', app.onBluetoothDisconnect, false);
 		document.addEventListener('newdevice', app.addNewDevice, false);
 		document.addEventListener('bluetoothstatechange', app.onBluetoothStateChange, false);
+		document.addEventListener('onsubscribestatechange', app.onSubscribeStateChange, false);
+		document.addEventListener('oncharacteristicread', app.onCharacteristicRead, false);
+		document.addEventListener('oncharacteristicwrite', app.onCharacteristicWrite, false);
+		document.addEventListener('ondescriptorread', app.onDescriptorRead, false);
+		document.addEventListener('ondescriptorwrite', app.onDescriptorWrite, false);
     },
     
 	onDeviceConnected : function(arg){
@@ -81,6 +87,41 @@ var app = {
 			alert("bluetooth is closed!");
 			BC.Bluetooth.OpenBluetooth(function(){alert("opened!");});
 		}
+	},
+	
+	onSubscribeStateChange : function(arg){
+		var service = BC.bluetooth.services[arg.uniqueID];
+		var character = service.characteristics[arg.characteristicIndex];
+		if(character.isSubscribed){
+			var data = new Uint8Array(128);
+			for (var i = 0; i < 128; i++) {
+				data[i] = '2';
+			}
+			window.setTimeout(function(){
+				interval_notify_index = window.setInterval(function() {
+					character.notify(data,function(){alert("notify success!")},function(){alert("notify error!")});
+				}, 5000);
+			},2000);
+		}else{
+			window.clearInterval(interval_notify_index);
+			alert("stop notify success!");
+		}
+	},
+	
+	onCharacteristicRead : function(arg){
+		alert(JSON.stringify(arg));
+	},
+	
+	onCharacteristicWrite : function(arg){
+		alert(JSON.stringify(arg));
+	},
+	
+	onDescriptorRead : function(arg){
+		alert(JSON.stringify(arg));
+	},
+	
+	ondescriptorwrite : function(arg){
+		alert(JSON.stringify(arg));
 	},
 	
 	addNewDevice: function(arg){
@@ -355,7 +396,7 @@ var app = {
 	createService : function(){
 	
 		var service = BC.Bluetooth.CreateService("0000ffe0-0000-1000-8000-00805f9b34fb");
-		var property = ["read","write"];
+		var property = ["read","write","notify"];
 		var permission = ["read","write"];
 		var onMyWriteRequestName = "myWriteRequest";
 		var onMyReadRequestName = "myReadRequest";
@@ -367,9 +408,9 @@ var app = {
 		character1.addDescriptor(descriptor2);
 		service.addCharacteristic(character1);
 		service.addCharacteristic(character2);
+		//the service will add into BC.bluetooth.services. Just like BC.bluetooth.devices
 		BC.Bluetooth.AddService(service,app.addServiceSusscess,app.addServiceError);
-		
-		services[0] = service;
+		serviceUniqueID = service.uniqueID;
 	},
 	
 	addServiceSusscess : function(){
@@ -389,7 +430,7 @@ var app = {
 	},
 	
 	removeService : function(){
-		BC.Bluetooth.RemoveService(services[0],app.removeServiceSuccess,app.removeServiceError);
+		BC.Bluetooth.RemoveService(BC.bluetooth.services[serviceUniqueID],app.removeServiceSuccess,app.removeServiceError);
 	},
 	
 	getPairedDevice : function(){

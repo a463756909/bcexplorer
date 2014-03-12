@@ -13,7 +13,8 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-var serviceUniqueID;
+var serviceUniqueID = "";
+var interval_notify_index = "";
 var app = {
 
     // Application Constructor
@@ -28,7 +29,7 @@ var app = {
 		document.addEventListener('devicedisconnected', app.onBluetoothDisconnect, false);
 		document.addEventListener('newdevice', app.addNewDevice, false);
 		document.addEventListener('bluetoothstatechange', app.onBluetoothStateChange, false);
-		document.addEventListener('onsubscribestatechange', app.onSubscribeSateChange, false);
+		document.addEventListener('onsubscribestatechange', app.onSubscribeStateChange, false);
 		document.addEventListener('oncharacteristicread', app.onCharacteristicRead, false);
 		document.addEventListener('oncharacteristicwrite', app.onCharacteristicWrite, false);
 		document.addEventListener('ondescriptorread', app.onDescriptorRead, false);
@@ -88,19 +89,18 @@ var app = {
 		}
 	},
 	
-	onSubscribeSateChange : function(arg){
+	onSubscribeStateChange : function(arg){
 		var service = BC.bluetooth.services[arg.uniqueID];
 		var character = service.characteristics[arg.characteristicIndex];
-		var interval_notify_index = null;
-		if(character.isSubscribed){		
+		if(character.isSubscribed){
 			var data = new Uint8Array(128);
 			for (var i = 0; i < 128; i++) {
-				data[i] = 'a';
+				data[i] = '2';
 			}
 			window.setTimeout(function(){
 				interval_notify_index = window.setInterval(function() {
 					character.notify(data,function(){alert("notify success!")},function(){alert("notify error!")});
-				}, 2000);
+				}, 5000);
 			},2000);
 		}else{
 			window.clearInterval(interval_notify_index);
@@ -396,7 +396,7 @@ var app = {
 	createService : function(){
 	
 		var service = BC.Bluetooth.CreateService("0000ffe0-0000-1000-8000-00805f9b34fb");
-		var property = ["read","write"];
+		var property = ["read","write","notify"];
 		var permission = ["read","write"];
 		var onMyWriteRequestName = "myWriteRequest";
 		var onMyReadRequestName = "myReadRequest";

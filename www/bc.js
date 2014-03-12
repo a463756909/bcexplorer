@@ -214,7 +214,7 @@
 		var result = "";
 		var length = data.byteLength;
 		for (var i = 0; i < length; i++){
-			var result = result + String.fromCharCode(data[i]);
+			var result = result + data[i];
 		}
 		return window.btoa(result);
 	}
@@ -1158,6 +1158,7 @@
 			
 			this.addCharacteristic = function(chara){
 				chara.upper = this;
+                chara.index = this.characteristics.length;
 				this.characteristics.push(chara);
 			};
 		},
@@ -1258,6 +1259,7 @@
             
             this.addDescriptor = function(des){
                 des.upper = this;
+                des.index = this.descriptors.length;
                 this.descriptors.push(des);
             };
         },
@@ -1516,15 +1518,3 @@
   });
   
 })();
-
-
-
-
-
-
-
-
-
-
-
-
