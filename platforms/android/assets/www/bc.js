@@ -566,7 +566,12 @@
 	 * @param {function} [error] - Error callback
 	 */
 	var RemoveService = BC.Bluetooth.RemoveService = function(service,success,error){
-		BC.bluetooth.removeService(service,success,error);
+		BC.bluetooth.removeService(service,function(){
+			delete BC.bluetooth.services[service.uniqueID];
+			success();
+		},function(){
+			error();
+		});
 	};
 	/** 
 	 * Starts a scan for Bluetooth LE devices, looking for devices with given services.

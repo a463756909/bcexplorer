@@ -13,7 +13,7 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */
-
+var serviceUniqueID;
 var app = {
 
     // Application Constructor
@@ -410,7 +410,7 @@ var app = {
 		service.addCharacteristic(character2);
 		//the service will add into BC.bluetooth.services. Just like BC.bluetooth.devices
 		BC.Bluetooth.AddService(service,app.addServiceSusscess,app.addServiceError);
-		
+		serviceUniqueID = service.uniqueID;
 	},
 	
 	addServiceSusscess : function(){
@@ -430,7 +430,7 @@ var app = {
 	},
 	
 	removeService : function(){
-		BC.Bluetooth.RemoveService(services[0],app.removeServiceSuccess,app.removeServiceError);
+		BC.Bluetooth.RemoveService(BC.bluetooth.services[serviceUniqueID],app.removeServiceSuccess,app.removeServiceError);
 	},
 	
 	getPairedDevice : function(){
@@ -439,10 +439,6 @@ var app = {
 	
 	getConnectedDevice : function(){
 		BC.Bluetooth.GetConnectedDevices(function(mes){alert(JSON.stringify(mes));},function(mes){alert(JSON.stringify(mes));});
-	},
-	
-	sendNotifiCation : function(){
-	
 	},
 	
 	getRSSI : function(){
