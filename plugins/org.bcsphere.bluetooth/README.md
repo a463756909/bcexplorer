@@ -19,7 +19,7 @@ Features
 #### Effective Utilization of Apache Cordova/PhoneGap Ecosystem
 * PhoneGap enables the implementation of many useful plugins such as  [Camera](http://docs.phonegap.com/en/edge/cordova_camera_camera.md.html#Camera)/[Accelerometer](http://docs.phonegap.com/en/edge/cordova_accelerometer_accelerometer.md.html#Accelerometer)/[Compass](http://docs.phonegap.com/en/edge/cordova_compass_compass.md.html#Compass)...
 * You can implements your own [plugins](http://docs.phonegap.com/en/3.3.0/guide_hybrid_plugins_index.md.html#Plugin%20Development%20Guide) based on BC.js for others.
-* There is many plugins implements by third party(like [Cordova-plugin-websqldatabase](http://smile-sa.github.io/cordova-plugin-websqldatabase/)), most of them are open-source.
+* There is many plugins implements by third party(you can find them on [PlugReg](http://plugreg.com/)), most of them are open-source.
 
 #### Internet of Things
 * Both Bluetooth Low Energy and JavaScript are asynchronous by their DNA,which makes them a good match. 
@@ -30,6 +30,7 @@ Support platforms
 -----------------------------------
 * Android API 18+ (All devices with Bluetooth Low Energy HW)
 * Android API 17+ (Sumsung devices with Bluetooth Low Energy HW)
+* Android API 16+ (HTC devices with Bluetooth Low Energy HW, <b>Please note:</b> HTC use shared library to operate BLE device, you should add the 'com.htc.android.bluetooth.le.jar' in the build path manually to support HTC devices.)
 * IOS 6.0.1+  (iPhone4S+/iTouch5/iPad3+/iPad-mini/iPadAir)
 
 </br></br>

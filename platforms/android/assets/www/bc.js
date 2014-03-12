@@ -118,10 +118,10 @@
 
 	//this function is used to bind "this" pointer in case of it changed by params pass.
 	function bind(){  
-		if (arguments.length < 2 && arguments[0] === undefined)      
-			return this;   
-		var __method = this, args = aa(arguments), object = args.shift();   
-			return function(){return __method.apply(object, args.concat(aa(arguments)));} 
+	if (arguments.length < 2 && arguments[0] === undefined)      
+		return this;   
+	var __method = this, args = aa(arguments), object = args.shift();   
+		return function(){return __method.apply(object, args.concat(aa(arguments)));} 
 	}
 	
 	if (!Function.prototype.bind){
@@ -134,14 +134,13 @@
 		return (r.test(this.S+this.join(this.S)+this.S));
 	}
 	
-	function fireBLEEvent(eventName,deviceID,serviceIndex,characteristicIndex,descriptorIndex,uniqueID,arg){
+	function fireBLEEvent(eventName,deviceID,serviceIndex,characteristicIndex,descriptorIndex,arg){
 		var event = document.createEvent('Events');
 		event.deviceID = deviceID;
 		event.serviceIndex = serviceIndex;
 		event.characteristicIndex = characteristicIndex;
 		event.descriptorIndex = descriptorIndex;
 		event.arg = arg;
-		event.uniqueID = uniqueID;
 		event.initEvent(eventName, false, false);
 		document.dispatchEvent(event);
 	}
@@ -152,28 +151,6 @@
 			BC.bluetooth.devices[arg.deviceID].isConnected = false;
 			fireBLEEvent("devicedisconnected",arg.deviceID);
 		});
-		BC.bluetooth.addListener('onsubscribe', function(arg){
-			var service = BC.bluetooth.services[arg.uniqueID];
-			service.characteristics[arg.characteristicIndex].isSubscribed = true;
-			fireBLEEvent("onsubscribestatechange",null,null,arg.characteristicIndex,null,arg.uniqueID);
-		});
-		BC.bluetooth.addListener('onunsubscribe', function(arg){
-			var service = BC.bluetooth.services[arg.uniqueID];
-			service.characteristics[arg.characteristicIndex].isSubscribed = false;
-			fireBLEEvent("onsubscribestatechange",null,null,arg.characteristicIndex,null,arg.uniqueID);
-		});
-		BC.bluetooth.addListener('oncharacteristicread', function(arg){
-			fireBLEEvent("oncharacteristicread",null,null,arg.characteristicIndex,null,arg.uniqueID);
-		});
-		BC.bluetooth.addListener('oncharacteristicwrite', function(arg){
-			fireBLEEvent("oncharacteristicwrite",null,null,arg.characteristicIndex,null,arg.uniqueID);
-		});
-		BC.bluetooth.addListener('ondescriptorread', function(arg){
-			fireBLEEvent("ondescriptorread",null,null,arg.characteristicIndex,arg.descriptorIndex,arg.uniqueID);
-		});
-		BC.bluetooth.addListener('ondescriptorwrite', function(arg){
-			fireBLEEvent("ondescriptorwrite",null,null,arg.characteristicIndex,arg.descriptorIndex,arg.uniqueID);
-		});
 		document.addEventListener("bluetoothclose",function(){
 			BC.bluetooth.isopen = false;
 			fireBLEEvent("bluetoothstatechange");
@@ -182,7 +159,6 @@
 			BC.bluetooth.isopen = true;
 			fireBLEEvent("bluetoothstatechange");
 		},false);
-		
 		bluetooth.getEnvironment(function(data){
 			if(DEBUG){
 				alert(JSON.stringify(data));
@@ -210,14 +186,6 @@
         return arraybuffer.buffer;
 	}
   
-	function convertToBase64(data){
-		var result = "";
-		var length = data.byteLength;
-		for (var i = 0; i < length; i++){
-			var result = result + data[i];
-		}
-		return window.btoa(result);
-	}
   
 	function isEmpty(s){
 		return ((s == undefined || s == null || s == "") ? true : false); 
@@ -292,7 +260,7 @@
 				var getRSSIError = device.getRSSIError.bind(device,device.getRSSIError);
 				navigator.bluetooth.getRSSI(getRSSISuccess,getRSSIError,device.deviceID);
 			};
-			this.addServices = function(serviceObj,success,error){
+			this.addServices = function(service,serviceObj,success,error){
 				navigator.bluetooth.addServices(success,error,serviceObj);
 			};
 			this.removeService = function(service,success,error){
@@ -346,11 +314,6 @@
 			this.addEventListener = function(success,error,arg){
 				navigator.bluetooth.addEventListener(success,error,arg);
 			};
-			this.notify = function(characteristic,data){
-				var notifySuccess = characteristic.notifySuccess.bind(characteristic,characteristic.notifySuccess);
-				var notifyError = characteristic.notifyError.bind(characteristic,characteristic.notifyError);
-				navigator.bluetooth.notify(notifySuccess,notifyError,characteristic.upper.uniqueID,characteristic.index,data);
-			};
 			
 		}else{
 			alert(type+" is not support now.");
@@ -364,7 +327,6 @@
 	 * <p><b>Please note</b> that the application should not create Bluetooth object, BC manages the object model.
 	 * @class
 	 * @property {Array<Device>} devices - The advertising devices, this is filled after 'BC.Blueooth.StartScan' called
-	 * @property {Array<Service>} services - The services add by 'AddService' interface
 	 * @property {boolean} isopen - Bluetooth is open or not
 	 */
 	var Bluetooth = BC.Bluetooth = function(type){
@@ -400,17 +362,15 @@
 		this.getRSSI = this.bluetoothFuncs.getRSSI;
 		this.addServices =  this.bluetoothFuncs.addServices;
 		this.removeService = this.bluetoothFuncs.removeService;
-		this.notify = this.bluetoothFuncs.notify;
 		
 		this.bluetoothFuncs.initBluetooth();
-
+		
 		/**
 		 * @property {object}  defaults               - The default values for parties.
 		 */
 		var bluetooth = BC.bluetooth = this;
 		
 		this.devices = {};
-		this.services = {};
 		this.isopen = false;
 	};
 	_.extend(Bluetooth.prototype,{
@@ -542,12 +502,7 @@
 	 */
 	var AddService = BC.Bluetooth.AddService = function(service,success,error){
 		var serviceObj = serializeService(service);
-		BC.bluetooth.addServices(serviceObj,function(){
-			BC.bluetooth.services[service.uniqueID] = service;
-			success();
-		},function(){
-			error();
-		});
+		BC.bluetooth.addServices(service,serviceObj,success,error);
 	};
 	/** 
 	 * Removes a BLE service from the smart phone.
@@ -566,12 +521,7 @@
 	 * @param {function} [error] - Error callback
 	 */
 	var RemoveService = BC.Bluetooth.RemoveService = function(service,success,error){
-		BC.bluetooth.removeService(service,function(){
-			delete BC.bluetooth.services[service.uniqueID];
-			success();
-		},function(){
-			error();
-		});
+		BC.bluetooth.removeService(service,success,error);
 	};
 	/** 
 	 * Starts a scan for Bluetooth LE devices, looking for devices with given services.
@@ -1158,7 +1108,6 @@
 			
 			this.addCharacteristic = function(chara){
 				chara.upper = this;
-                chara.index = this.characteristics.length;
 				this.characteristics.push(chara);
 			};
 		},
@@ -1238,7 +1187,6 @@
 		value : null,
 		property : null,
 		type : null,
-		isSubscribed : false,
 		
 		initialize : function(){
             var dess = arguments[5];
@@ -1259,7 +1207,6 @@
             
             this.addDescriptor = function(des){
                 des.upper = this;
-                des.index = this.descriptors.length;
                 this.descriptors.push(des);
             };
         },
@@ -1384,28 +1331,6 @@
 			this.error(arguments);
 		},
 		
-		
-		/**
-         * Sends notify data to the subscriber.
-         * @memberof Characteristic
-         * @example device.services[3].characteristics[3].notify(data,successCallback,errorCallback);
-		 * @param {Uint8Array} data - The data to notify
-         * @param {function} [successCallback] - Success callback
-         * @param {function} [errorCallback] - Error callback
-         * @instance
-         */
-        notify : function(data,success,error){
-            this.success = success;
-            this.error = error;
-			BC.bluetooth.notify(this,convertToBase64(data));
-        },
-        notifySuccess : function(){
-            this.success();
-        },
-        notifyError : function(){
-            this.error(arguments);
-        },
-		
 		/**
 		 * Discovers descriptors for the characteristic.
 		 * @memberof Characteristic
@@ -1518,3 +1443,15 @@
   });
   
 })();
+
+
+
+
+
+
+
+
+
+
+
+
