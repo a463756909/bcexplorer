@@ -843,18 +843,6 @@ public class Tools {
 		return new SimpleDateFormat(DATE_FORMATE).format(new Date());
 	}
 
-	public static byte[] parsingCodingFormat(String writeValue, String writeType) {
-		if (writeType.toLowerCase().equals("hex")) {
-			return hexStringToByte(writeValue);
-		}
-		if (writeType.toLowerCase().equals("ascii")) {
-			return ascIIStringToByte(writeValue);
-		}
-		if (writeType.toLowerCase().equals("unicode")) {
-			return writeValue.getBytes();
-		}
-		return null;
-	}
 	
 	public static final String bytesToHexString(byte[] bArray)
 	{
