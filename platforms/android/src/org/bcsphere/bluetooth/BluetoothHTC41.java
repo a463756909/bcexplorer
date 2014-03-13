@@ -310,7 +310,7 @@ public class BluetoothHTC41 implements IBluetooth {
         // Tools.sendErrorMsg(callbackContext);
         // return;
         // }
-        byte[] value = writeValue.getBytes();
+        byte[] value = Tools.decodeBase64(writeValue);
         if (mapWriteValueCallBack == null) {
             mapWriteValueCallBack = new HashMap<Object, CallbackContext>();
         }
@@ -530,7 +530,7 @@ public class BluetoothHTC41 implements IBluetooth {
                     Tools.CHARACTERISTIC_PROPERTY));
             int characterPermission = Tools.encodePermission(Tools.getArray(jsonCharacteristics, j,
                     Tools.CHARACTERISTIC_PERMISSION));
-            byte[] value = characteristicValue.getBytes();
+            byte[] value = Tools.decodeBase64(characteristicValue);;
             BleCharacteristic bleCharacteristic = new BleCharacteristic(new BleGattID(characteristicUUID));
             bleCharacteristic.setHandle(j);
             bleCharacteristic.setProperty(characterProperty);
@@ -550,7 +550,7 @@ public class BluetoothHTC41 implements IBluetooth {
             String descriptorValue = Tools.getData(jsonDescriptors, k, Tools.DESCRIPTOR_VALUE);
             String descriptorUUID = Tools.getData(jsonDescriptors, k, Tools.DESCRIPTOR_UUID);
             int descriptorsPermission = Tools.encodePermission(Tools.getArray(jsonDescriptors, k,Tools.DESCRIPTOR_PERMISSION));
-            byte[] value = descriptorValue.getBytes();
+            byte[] value = Tools.decodeBase64(descriptorValue);;
             BleDescriptor bleDescriptor = new BleDescriptor(new BleGattID(descriptorUUID));
             bleDescriptor.setHandle(k);
             bleDescriptor.setPermission(descriptorsPermission, k);

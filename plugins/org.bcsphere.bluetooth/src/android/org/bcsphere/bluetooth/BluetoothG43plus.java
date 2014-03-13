@@ -250,12 +250,12 @@ public class BluetoothG43plus implements IBluetooth{
 		if (descriptorIndex.equals("")) {
 			BluetoothGattCharacteristic characteristic = deviceServices.get(deviceID).get(serviceIndex)
 					.getCharacteristics().get(characteristicIndex);
-			characteristic.setValue(writeValue.getBytes());
+			characteristic.setValue(Tools.decodeBase64(writeValue));
 			mBluetoothGatts.get(deviceID).writeCharacteristic(characteristic);
 		}else {
 			BluetoothGattDescriptor descriptor = deviceServices.get(deviceID).get(serviceIndex).getCharacteristics()
 					.get(characteristicIndex).getDescriptors().get(Integer.parseInt(descriptorIndex));
-			descriptor.setValue(writeValue.getBytes());
+			descriptor.setValue(Tools.decodeBase64(writeValue));
 			mBluetoothGatts.get(deviceID).writeDescriptor(descriptor);
 		}
 	} 
@@ -473,7 +473,7 @@ public class BluetoothG43plus implements IBluetooth{
 			BluetoothGattService service =  new BluetoothGattService(serviceUUID, serviceType);
 			JSONArray characteristics = Tools.getArray(services, i, Tools.CHARACTERISTICS);
 			for (int j = 0; j <characteristics.length(); j++) {
-				byte[] characteristicValue = Tools.getData(characteristics, Tools.CHARACTERISTIC_VALUE).getBytes();
+				byte[] characteristicValue = Tools.decodeBase64(Tools.getData(characteristics, Tools.CHARACTERISTIC_VALUE));
 				UUID characteristicUUID = UUID.fromString(Tools.getData(characteristics, Tools.CHARACTERISTIC_UUID));
 				int characteristicProperty = Tools.encodeProperty(Tools.getArray(characteristics, Tools.CHARACTERISTIC_PROPERTY));
 				int characteristicPermission = Tools.encodePermission(Tools.getArray(characteristics, Tools.CHARACTERISTIC_PERMISSION));
@@ -481,7 +481,7 @@ public class BluetoothG43plus implements IBluetooth{
 				characteristic.setValue(characteristicValue);
 				JSONArray descriptors = Tools.getArray(characteristics, j, Tools.DESCRIPTORS);
 				for (int k = 0; k < descriptors.length(); k++) {
-					byte[] descriptorValue =Tools.getData(descriptors, Tools.DESCRIPTOR_VALUE).getBytes();
+					byte[] descriptorValue =Tools.decodeBase64(Tools.getData(descriptors, Tools.DESCRIPTOR_VALUE));
 					UUID descriptorUUID = UUID.fromString(Tools.getData(descriptors, Tools.DESCRIPTOR_UUID));
 					int descriptorPermission = Tools.encodePermission(Tools.getArray(descriptors, Tools.DESCRIPTOR_PERMISSION));
 					BluetoothGattDescriptor descriptor = new BluetoothGattDescriptor(descriptorUUID, descriptorPermission);

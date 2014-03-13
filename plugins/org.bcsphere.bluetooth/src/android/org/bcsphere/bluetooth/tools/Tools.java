@@ -601,6 +601,11 @@ public class Tools {
 	public static String encodeBase64(byte[] value) {
 		return Base64.encodeToString(value, Base64.NO_WRAP | Base64.NO_PADDING);
 	}
+	
+	public static byte[] decodeBase64(String value){
+		Base64.decode(value, Base64.DEFAULT);
+		return null;
+	}
 
 	public static void addProperty(JSONObject obj, String key, Object value) {
 		try {

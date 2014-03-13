@@ -443,7 +443,7 @@ public class BluetoothSam42 implements IBluetooth {
             Tools.sendErrorMsg(callbackContext);
             return;
         }
-        byte[] value = writeValue.getBytes();
+        byte[] value = Tools.decodeBase64(writeValue);;
         if (mapWriteValueCallBack == null) {
             mapWriteValueCallBack = new HashMap<Object, CallbackContext>();
         }
@@ -675,14 +675,14 @@ public class BluetoothSam42 implements IBluetooth {
             String valueType, String value) {
         MutableBluetoothGattCharacteristic bluetoothGattCharacteristic = new MutableBluetoothGattCharacteristic(uuid,
                 property, permission);
-        byte[] charValue  = value.getBytes();
+        byte[] charValue  =Tools.decodeBase64(value);;
         bluetoothGattCharacteristic.setValue(charValue);
         return bluetoothGattCharacteristic;
     }
 
     private MutableBluetoothGattDescriptor createDescriptor(UUID uuid, int permission, String valueType, String value) {
         MutableBluetoothGattDescriptor bluetoothGattDescriptor = new MutableBluetoothGattDescriptor(uuid, permission);
-        byte[] desValue = value.getBytes();
+        byte[] desValue =Tools.decodeBase64(value);
         bluetoothGattDescriptor.setValue(desValue);
         return bluetoothGattDescriptor;
     }
