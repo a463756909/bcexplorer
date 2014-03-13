@@ -495,10 +495,10 @@
                         if (peripheral.services.count > [serviceIndex intValue]) {
                             CBService *service=[peripheral.services objectAtIndex:[serviceIndex intValue]];
                             if ([self isNormalString:characteristicIndex]){
-                                if (service.characteristics.count > [characteristicIndex intValue]) {
+                                if (service.characteristics.count > [characteristicIndex intValue]){
                                     CBCharacteristic *characteristic = [service.characteristics objectAtIndex:[characteristicIndex intValue]];
                                     if ([self isNormalString:descriptorIndex]){
-                                        if (characteristic.descriptors.count > [descriptorIndex intValue]) {
+                                        if (characteristic.descriptors.count > [descriptorIndex intValue]){
                                             peripheral.delegate = self;
                                             [peripheral writeValue:data forDescriptor:[characteristic.descriptors objectAtIndex: [descriptorIndex intValue] ]];
                                         }else{
@@ -506,7 +506,11 @@
                                         }
                                     }else{
                                         peripheral.delegate = self;
-                                        [peripheral writeValue:data forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
+                                        if (characteristic.properties & CBCharacteristicPropertyWriteWithoutResponse){
+                                            [peripheral writeValue:data forCharacteristic:characteristic type:CBCharacteristicWriteWithoutResponse];
+                                        }else if (characteristic.properties & CBCharacteristicPropertyWrite){
+                                            [peripheral writeValue:data forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
+                                        }
                                     }
                                 }else{
                                     [self error:command.callbackId];
@@ -1519,9 +1523,9 @@
     for(int i = 0;i < [hexString length];i++){
         unichar hex_char1 = [hexString characterAtIndex:i];
         int int_ch1;
-        if(hex_char1 >= '0' && hex_char1 <='9'){
+        if(hex_char1 >= '0' && hex_char1 <= '9'){
             int_ch1 = (hex_char1-48)*16;
-        }else if(hex_char1 >= 'A' && hex_char1 <='F'){
+        }else if(hex_char1 >= 'A' && hex_char1 <= 'F'){
             int_ch1 = (hex_char1-55)*16;
         }else{
             return nil;
@@ -1530,15 +1534,18 @@
         
         unichar hex_char2 = [hexString characterAtIndex:i];
         int int_ch2;
-        if(hex_char2 >= '0' && hex_char2 <='9'){
+        if(hex_char2 >= '0' && hex_char2 <= '9'){
             int_ch2 = (hex_char2-48);
-        }else if(hex_char2 >= 'A' && hex_char2 <='F'){
+        }else if(hex_char2 >= 'A' && hex_char2 <= 'F'){
             int_ch2 = hex_char2-55;
         }else{
             return nil;
         }
-        
-        [arryByte addObject:[NSString stringWithFormat:@"%i",int_ch1+int_ch2]];
+        if (int_ch1+int_ch2 < 16) {
+            [arryByte addObject:[NSString stringWithFormat:@"0%i",int_ch1+int_ch2]];
+        }else{
+            [arryByte addObject:[NSString stringWithFormat:@"%i",int_ch1+int_ch2]];
+        }
     }
     if (arryByte.count > 0) {
         for (int i = arryByte.count-1; i >= 0; i--) {
