@@ -489,7 +489,7 @@
                 NSString *descriptorIndex = [self parseStringFromJS:command.arguments keyFromJS:DESCRIPTOR_INDEX];
                 NSString *characteristicIndex = [self parseStringFromJS:command.arguments keyFromJS:CHARACTERISTIC_INDEX];
                 NSString *serviceIndex = [self parseStringFromJS:command.arguments keyFromJS:SERVICE_INDEX];
-                NSData *data = [self stringToByte:valueWrite];
+                NSData *data = [NSData dataFromBase64String:valueWrite];
                 if (data) {
                     if ([self isNormalString:serviceIndex]){
                         if (peripheral.services.count > [serviceIndex intValue]) {
@@ -1512,7 +1512,7 @@
     return char_content;
 }
 
--(NSData*)stringToByte:(NSString*)string{
+-(NSData*)stringToByte:(NSString *)string{
     NSString *hexString = [[string uppercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""];
     if ([hexString length]%2 != 0) {
         return nil;
