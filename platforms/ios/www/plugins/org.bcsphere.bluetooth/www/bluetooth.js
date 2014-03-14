@@ -78,8 +78,8 @@ var bluetooth = {
     	cordova.exec(successFunc,errorFunc, "BCBluetooth", "readValue", [{"deviceID":deviceID,"serviceIndex":serviceIndex,"characteristicIndex":characteristicIndex,"descriptorIndex":""}]);
     },
     
-    writeCharacteristic: function(successFunc,errorFunc,deviceID,serviceIndex,characteristicIndex,writeValue,writeType){
-    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "writeValue", [{"deviceID":deviceID,"serviceIndex":serviceIndex,"characteristicIndex":characteristicIndex,"descriptorIndex":"","writeValue":writeValue,"writeType":writeType}]);
+    writeCharacteristic: function(successFunc,errorFunc,deviceID,serviceIndex,characteristicIndex,writeValue){
+    	cordova.exec(successFunc,errorFunc, "BCBluetooth", "writeValue", [{"deviceID":deviceID,"serviceIndex":serviceIndex,"characteristicIndex":characteristicIndex,"descriptorIndex":"","writeValue":writeValue}]);
     },
     
     subscribe: function(successFunc,errorFunc,deviceID,serviceIndex,characteristicIndex,notifyEventName){

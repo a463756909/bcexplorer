@@ -603,8 +603,8 @@ public class Tools {
 	}
 	
 	public static byte[] decodeBase64(String value){
-		Base64.decode(value, Base64.DEFAULT);
-		return null;
+		byte[] result = Base64.decode(value, Base64.DEFAULT);
+		return result;
 	}
 
 	public static void addProperty(JSONObject obj, String key, Object value) {
