@@ -122,6 +122,7 @@
 #define WRITE @"write"
 #define ON_READ_REQUEST @"onReadRequest"
 #define ON_WRITE_REQUEST @"onWriteRequest"
+#define WRITEREQUESTVALUE @"writeRequestValue"
 
 #define APP_ID @"appID"
 #define API @"api"
@@ -495,10 +496,10 @@
                         if (peripheral.services.count > [serviceIndex intValue]) {
                             CBService *service=[peripheral.services objectAtIndex:[serviceIndex intValue]];
                             if ([self isNormalString:characteristicIndex]){
-                                if (service.characteristics.count > [characteristicIndex intValue]){
+                                if (service.characteristics.count > [characteristicIndex intValue]) {
                                     CBCharacteristic *characteristic = [service.characteristics objectAtIndex:[characteristicIndex intValue]];
                                     if ([self isNormalString:descriptorIndex]){
-                                        if (characteristic.descriptors.count > [descriptorIndex intValue]){
+                                        if (characteristic.descriptors.count > [descriptorIndex intValue]) {
                                             peripheral.delegate = self;
                                             [peripheral writeValue:data forDescriptor:[characteristic.descriptors objectAtIndex: [descriptorIndex intValue] ]];
                                         }else{
@@ -506,7 +507,7 @@
                                         }
                                     }else{
                                         peripheral.delegate = self;
-                                        if (characteristic.properties & CBCharacteristicPropertyWriteWithoutResponse){
+                                        if (characteristic.properties & CBCharacteristicPropertyWriteWithoutResponse) {
                                             [peripheral writeValue:data forCharacteristic:characteristic type:CBCharacteristicWriteWithoutResponse];
                                         }else if (characteristic.properties & CBCharacteristicPropertyWrite){
                                             [peripheral writeValue:data forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
@@ -964,9 +965,12 @@
     CBCharacteristic *characteristicWrite = writeRequest.characteristic;
     CBService *service = characteristicWrite.service;
     NSMutableDictionary *callbackInfo = [self getUniqueIDWithService:service andCharacteristicIndex:characteristicWrite];
+    [callbackInfo setValue:[self getBase64EncodedFromData:writeRequest.value] forKey:WRITEREQUESTVALUE];
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:callbackInfo];
     [result setKeepCallbackAsBool:TRUE];
     [self.commandDelegate sendPluginResult:result callbackId:[[NSUserDefaults standardUserDefaults] objectForKey:EVENT_ONCHARACTERISTICWRITE]];
+    CBMutableCharacteristic *cha = [self getNotifyCharacteristic:[callbackInfo objectForKey:UINQUE_ID] characteristicIndex:[callbackInfo objectForKey:CHARACTERISTIC_INDEX]];
+    cha.value = writeRequest.value;
 }
 
 #pragma mark -
@@ -1510,50 +1514,6 @@
     NSString *uuid = CFBridgingRelease(CFUUIDCreateString(nil,UUID));
     const char *char_content = [uuid cStringUsingEncoding:NSASCIIStringEncoding];
     return char_content;
-}
-
--(NSData*)stringToByte:(NSString *)string{
-    NSString *hexString = [[string uppercaseString] stringByReplacingOccurrencesOfString:@" " withString:@""];
-    if ([hexString length]%2 != 0) {
-        return nil;
-    }
-    Byte tempbyt[1] = {0};
-    NSMutableArray *arryByte = [[NSMutableArray alloc] init];
-    NSMutableData *bytes = [NSMutableData data];
-    for(int i = 0;i < [hexString length];i++){
-        unichar hex_char1 = [hexString characterAtIndex:i];
-        int int_ch1;
-        if(hex_char1 >= '0' && hex_char1 <= '9'){
-            int_ch1 = (hex_char1-48)*16;
-        }else if(hex_char1 >= 'A' && hex_char1 <= 'F'){
-            int_ch1 = (hex_char1-55)*16;
-        }else{
-            return nil;
-        }
-        i++;
-        
-        unichar hex_char2 = [hexString characterAtIndex:i];
-        int int_ch2;
-        if(hex_char2 >= '0' && hex_char2 <= '9'){
-            int_ch2 = (hex_char2-48);
-        }else if(hex_char2 >= 'A' && hex_char2 <= 'F'){
-            int_ch2 = hex_char2-55;
-        }else{
-            return nil;
-        }
-        if (int_ch1+int_ch2 < 16) {
-            [arryByte addObject:[NSString stringWithFormat:@"0%i",int_ch1+int_ch2]];
-        }else{
-            [arryByte addObject:[NSString stringWithFormat:@"%i",int_ch1+int_ch2]];
-        }
-    }
-    if (arryByte.count > 0) {
-        for (int i = arryByte.count-1; i >= 0; i--) {
-            tempbyt[0] = [[NSString stringWithFormat:@"%@",[arryByte objectAtIndex:i]] intValue];
-            [bytes appendBytes:tempbyt length:1];
-        }
-    }
-    return bytes;
 }
 
 - (NSMutableArray *)getUUIDArr:(NSMutableArray *)array{
