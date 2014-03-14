@@ -537,9 +537,9 @@ public class BluetoothG43plus implements IBluetooth{
 				int newState) {
 			Log.i(TAG, "onConnectionStateChange");
 			super.onConnectionStateChange(gatt, status, newState);
+			addEventListenerManage(gatt ,newState);
 			conncetManage(gatt,newState );
 			disconnectManage(gatt,newState);
-			addEventListenerManage(gatt ,newState);
 		}
 
 		@Override
@@ -809,7 +809,7 @@ public class BluetoothG43plus implements IBluetooth{
 
 	private void addEventListenerManage(BluetoothGatt gatt, int newState){
 		String deviceID = getDeviceAddress(gatt);
-		if (newState == BluetoothGatt.STATE_DISCONNECTED) {
+		if (newState == BluetoothGatt.STATE_DISCONNECTED && disconnectCC.get(deviceID) == null) {
 			JSONObject obj = new JSONObject();
 			Tools.addProperty(obj, Tools.DEVICE_ID, deviceID);
 			PluginResult pluginResult = new PluginResult(PluginResult.Status.OK , obj);
