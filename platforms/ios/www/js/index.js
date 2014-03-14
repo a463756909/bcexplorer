@@ -99,7 +99,7 @@ var app = {
 			}
 			window.setTimeout(function(){
 				interval_notify_index = window.setInterval(function() {
-					character.notify(data,function(){alert("notify success!")},function(){alert("notify error!")});
+					character.notify('raw',data,function(){alert("notify success!")},function(){alert("notify error!")});
 				}, 5000);
 			},2000);
 		}else{
