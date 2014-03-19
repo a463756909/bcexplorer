@@ -147,6 +147,17 @@ var app = {
 		viewObj.listview("refresh");
 	},
 	
+	seeAdvData: function(){
+		var device = BC.bluetooth.devices[app.device.deviceID];
+		//alert(device.advertisementData.manufacturerData);
+		alert(JSON.stringify(device.advertisementData));
+		if(device.advertisementData.manufacturerData){
+			alert("ManufacturerData(Hex):"+app.device.advertisementData.manufacturerData.getHexString()+"\n"+
+			  "ManufacturerData(ASCII):"+app.device.advertisementData.manufacturerData.getASCIIString()+"\n"+
+			  "ManufacturerData(Unicode):"+app.device.advertisementData.manufacturerData.getUnicodeString());
+		}
+	},
+	
 	onBluetoothDisconnect: function(arg){
 		alert("device:"+arg.deviceID+" is disconnected!");
 		$.mobile.changePage("index.html","slideup");
