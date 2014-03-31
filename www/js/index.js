@@ -37,16 +37,16 @@ var app = {
     },
     
 	onDeviceConnected : function(arg){
-		var deviceID = arg.deviceID;
-		//alert("device:"+deviceID+" is connected!");
+		var deviceAddress = arg.deviceAddress;
+		//alert("device:"+deviceAddress+" is connected!");
 	},
 	
     bindUIEvents: function(){
     	$('#scanOnOff').change(app.startORstopScan); 
     },
     
-    device_page: function(deviceID){
-    	app.device = BC.bluetooth.devices[deviceID];
+    device_page: function(deviceAddress){
+    	app.device = BC.bluetooth.devices[deviceAddress];
 		BC.Bluetooth.StopScan();
 		var scanOnOff = $("#scanOnOff");
 		scanOnOff[0].selectedIndex = 0;
@@ -125,11 +125,11 @@ var app = {
 	},
 	
 	addNewDevice: function(arg){
-		var deviceID = arg.deviceID;
+		var deviceAddress = arg.deviceAddress;
 		var viewObj	= $("#user_view");
 		var liTplObj=$("#li_tpl").clone();
-		var newDevice = BC.bluetooth.devices[deviceID];
-		$("a",liTplObj).attr("onclick","app.device_page('"+newDevice.deviceID+"')");
+		var newDevice = BC.bluetooth.devices[deviceAddress];
+		$("a",liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
 		
 		liTplObj.show();
 		for(var key in newDevice){
@@ -148,7 +148,7 @@ var app = {
 	},
 	
 	seeAdvData: function(){
-		var device = BC.bluetooth.devices[app.device.deviceID];
+		var device = BC.bluetooth.devices[app.device.deviceAddress];
 		//alert(device.advertisementData.manufacturerData);
 		alert(JSON.stringify(device.advertisementData));
 		if(device.advertisementData.manufacturerData){
@@ -159,7 +159,7 @@ var app = {
 	},
 	
 	onBluetoothDisconnect: function(arg){
-		alert("device:"+arg.deviceID+" is disconnected!");
+		alert("device:"+arg.deviceAddress+" is disconnected!");
 		$.mobile.changePage("index.html","slideup");
 	},
 	
@@ -181,7 +181,7 @@ var app = {
 	
 	deviceViewInit: function(){
 		$("#deviceName").html(app.device.deviceName);
-		$("#deviceID").html(app.device.deviceID);
+		$("#deviceAddress").html(app.device.deviceAddress);
 		var isconnect = app.device.isConnected;
 
 		if(!isconnect){
@@ -272,7 +272,7 @@ var app = {
 	charViewInit: function(){
 		var serviceIndex = sessionStorage.getItem("serviceIndex");
 		$("#char_deviceName").html(app.device.deviceName);
-		$("#char_deviceID").html(app.device.deviceID);
+		$("#char_deviceAddress").html(app.device.deviceAddress);
 		$("#service_name").html(app.device.services[serviceIndex].name);
 		
 		var viewObj	= $("#char_view");
@@ -319,7 +319,7 @@ var app = {
 		var service = app.device.services[serviceIndex];
 		var character = service.characteristics[characterIndex];
 		$("#desc_deviceName").html(app.device.deviceName);
-		$("#desc_deviceID").html(app.device.deviceID);
+		$("#desc_deviceAddress").html(app.device.deviceAddress);
 		$("#desc_service_name").html(service.name);
 		$("#desc_char_name").html(character.name);
 		
@@ -353,7 +353,7 @@ var app = {
 		var service = app.device.services[serviceIndex];
 		var character = service.characteristics[characterIndex];
 		$("#operate_char_deviceName").html(app.device.deviceName);
-		$("#operate_char_deviceID").html(app.device.deviceID);
+		$("#operate_char_deviceAddress").html(app.device.deviceAddress);
 		$("#operate_service_name").html(service.name);
 		$("#operate_char_name").html(character.name);
 		$("#getDes_btn").click(function(){$.mobile.changePage("desc_list.html","slideup");});
@@ -469,10 +469,10 @@ var app = {
 	},
 	
 	getDeviceInfo : function(){
-		app.device.getDeviceInfo(app.getDeviceIDSuccess,app.getDeviceIDError);
+		app.device.getDeviceInfo(app.getdeviceAddressSuccess,app.getdeviceAddressError);
 	},
 	
-	getDeviceIDSuccess : function(){
+	getdeviceAddressSuccess : function(){
 		alert("System ID:"+app.device.systemID.getHexString()+"\n"+
 			  "Model Number:"+app.device.modelNum.getASCIIString()+"\n"+
 			  "Serial Number:"+app.device.serialNum.getASCIIString()+"\n"+
@@ -482,7 +482,7 @@ var app = {
 			  "Manufacturer Name:"+app.device.manufacturerName.getASCIIString());
 	},
 	
-	getDeviceIDError : function(){
+	getdeviceAddressError : function(){
 		alert("get device ID (profile) error!");
 	},
 };
