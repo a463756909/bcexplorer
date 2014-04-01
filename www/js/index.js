@@ -48,32 +48,29 @@ var app = {
     device_page: function(deviceAddress){
     	app.device = BC.bluetooth.devices[deviceAddress];
 		BC.Bluetooth.StopScan();
-		var scanOnOff = $("#scanOnOff");
-		scanOnOff[0].selectedIndex = 0;
-		scanOnOff.slider("refresh");
-    	$.mobile.changePage("device_detail.html","slideup");
+    	$.mobile.changePage("connect.html","slideup");
     },
     
-    startORstopScan: function(){
-		var state = $("#scanOnOff").val();
-		if(state == 1){
-			BC.Bluetooth.StartScan();
-		}else if(state == 0){
-			BC.Bluetooth.StopScan();
-		}
+    startScan : function(){
+    	$('#switchScan').attr("src","img/searching1.png");
+    	$('#switchScan').attr("onclick","app.stopScan()");
+    	BC.Bluetooth.StartScan();
+    },
+    
+    stopScan : function(){
+    	$('#switchScan').attr("src","img/arrow.png");
+    	$('#switchScan').attr("onclick","app.startScan()");
+    	BC.Bluetooth.StopScan();
     },
     
     onBCReady: function() {
 		if(!BC.bluetooth.isopen){
 			if(API !== "ios"){
 				BC.Bluetooth.OpenBluetooth(function(){
-					BC.Bluetooth.StartScan();
 				});
 			}else{					
 				alert("Please open your bluetooth first.");
 			}
-		}else{
-			BC.Bluetooth.StartScan();
 		}
     },
 	
@@ -129,9 +126,9 @@ var app = {
 		var viewObj	= $("#user_view");
 		var liTplObj=$("#li_tpl").clone();
 		var newDevice = BC.bluetooth.devices[deviceAddress];
-		$("a",liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
-		
+		$("div",liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
 		liTplObj.show();
+		
 		for(var key in newDevice){
 			if(key == "isConnected"){
 				if(newDevice.isConnected){
@@ -141,10 +138,8 @@ var app = {
 			}else{
 				$("[dbField='"+key+"']",liTplObj).html(newDevice[key]);
 			}
-		}	
-			
+		}
 		viewObj.append(liTplObj);
-		viewObj.listview("refresh");
 	},
 	
 	seeAdvData: function(){
@@ -184,17 +179,15 @@ var app = {
 		$("#deviceAddress").html(app.device.deviceAddress);
 		var isconnect = app.device.isConnected;
 
-		if(!isconnect){
-			$("#connect").show();
-		}else{
-			$("#device_operation").show();
-			$("#disconnect").show();
-			app.fillServices();
+		if(isconnect){
+			$("#connect_panel").hide();
+			$("#disconnect_panel").show();
+			app.device.discoverServices(function(){
+				app.fillServices();
+			},function(message){alert(message);});
 		}
-			
-		//bind events
+
 		$("#connect").click(app.connectDevice);
-		$("#disconnect").click(app.disconnectDevice);
 	},
 	
 	connectDevice: function(){
@@ -202,16 +195,14 @@ var app = {
 		app.device.connect(app.connectSuccess,app.connectError);
 	},
     connectError: function(){
-        app.hideLoader();
+        //app.hideLoader();
     },
 	connectSuccess: function(message){
-		$("#device_operation").show();
-		$("#disconnect").show();
-		$("#connect").hide();
-		//get all GATT table information about this device
-		//app.device.prepare(app.fillServices,function(message){alert(message);});
-		//or you can get service information only
-		app.device.discoverServices(app.fillServices,function(message){alert(message);});
+		$("#connect_panel").fadeOut(200);
+		$("#disconnect_panel").fadeIn(300);
+		app.device.discoverServices(function(){
+			app.fillServices();
+		},function(message){alert(message);});
 	},
 	
 	disconnectDevice: function(){
@@ -240,13 +231,15 @@ var app = {
 	},
 	
 	fillServices: function(){
+		$("#service_deviceName").html(app.device.deviceName);
+		$("#service_deviceAddress").html(app.device.deviceAddress);
 		var viewObj	= $("#service_view");
 		viewObj.empty();
 		for(var i=0; i<app.device.services.length; i++){
 			var service = app.device.services[i];
 			var liTplObj=$("#service_tpl").clone();
 			var serviceIndex = service.index;
-			$("a",liTplObj).attr("onclick","app.getChar('"+serviceIndex+"')");
+			$("div",liTplObj).attr("onclick","app.getChar('"+serviceIndex+"')");
 			liTplObj.show();
 			
 			for(var key in service){
@@ -274,13 +267,13 @@ var app = {
 		$("#char_deviceName").html(app.device.deviceName);
 		$("#char_deviceAddress").html(app.device.deviceAddress);
 		$("#service_name").html(app.device.services[serviceIndex].name);
+		$("#service_uuid").html(app.device.services[serviceIndex].uuid);
 		
 		var viewObj	= $("#char_view");
 		for(var i=0; i<app.device.services[serviceIndex].characteristics.length; i++){
 			var character = app.device.services[serviceIndex].characteristics[i];
 			var liTplObj=$("#char_tpl").clone();
-			$("#optChar",liTplObj).attr("onclick","app.optChar('"+character.index+"')");
-			$("#getDes",liTplObj).attr("onclick","app.change2DesView('"+character.index+"')");
+			$("div",liTplObj).attr("onclick","app.optChar('"+character.index+"')");
 			liTplObj.show();
 			
 			for(var key in character){
@@ -300,48 +293,6 @@ var app = {
 		}
 	},
 	
-	change2DesView: function(characteristicIndex){
-		sessionStorage.setItem("characterIndex",characteristicIndex);
-		//if you only get characteristic information, you should get discover descriptors next
-		var serviceIndex = sessionStorage.getItem("serviceIndex");
-		app.device.services[serviceIndex].characteristics[characteristicIndex].discoverDescriptors(function(){
-			$.mobile.changePage("desc_list.html","slideup");
-		},function(){
-			alert("get descriptors error!");
-		});
-		//$.mobile.changePage("desc_list.html","slideup");
-	},
-	
-	desListViewInit: function(){
-		//then recover from json string
-		var serviceIndex = sessionStorage.getItem("serviceIndex");
-		var characterIndex= sessionStorage.getItem("characterIndex");
-		var service = app.device.services[serviceIndex];
-		var character = service.characteristics[characterIndex];
-		$("#desc_deviceName").html(app.device.deviceName);
-		$("#desc_deviceAddress").html(app.device.deviceAddress);
-		$("#desc_service_name").html(service.name);
-		$("#desc_char_name").html(character.name);
-		
-		var viewObj	= $("#des_list_view");
-		var descriptors = character.descriptors;
-		viewObj.empty();
-		for(var i=0; i<descriptors.length; i++){
-			var liTplObj=$("#des_tpl").clone();
-			liTplObj.show();
-			
-			for(var key in descriptors[i]){
-				$("[dbField='"+key+"']",liTplObj).html(descriptors[i][key]);
-			}	
-			descriptors[i].read(function(data){
-				$("[dbField='value_hex']",liTplObj).html(data.value.getHexString());
-				$("[dbField='value_ascii']",liTplObj).html(data.value.getASCIIString());
-				$("[dbField='value_unicode']",liTplObj).html(data.value.getUnicodeString());
-			});
-			viewObj.append(liTplObj);
-		}
-	},
-	
 	optChar: function(index){
 		sessionStorage.setItem("characterIndex",index);
 		$.mobile.changePage("operate_char.html","slideup");
@@ -352,37 +303,81 @@ var app = {
 		var characterIndex = sessionStorage.getItem("characterIndex");
 		var service = app.device.services[serviceIndex];
 		var character = service.characteristics[characterIndex];
-		$("#operate_char_deviceName").html(app.device.deviceName);
+		$("#deviceName").html(app.device.deviceName);
 		$("#operate_char_deviceAddress").html(app.device.deviceAddress);
 		$("#operate_service_name").html(service.name);
+		$("#operate_service_uuid").html(service.uuid);
 		$("#operate_char_name").html(character.name);
-		$("#getDes_btn").click(function(){$.mobile.changePage("desc_list.html","slideup");});
+		$("#operate_char_uuid").html(character.uuid);
 		
-		$("#writeOK").click(function(){		
-				var type = $('input:radio[name="writeType"]:checked').val();
-				character.write(type,$('#writeValue').val(),app.writeCharSuccess,app.onGeneralError);
-			});
+		character.discoverDescriptors(function(){
+			var viewObj	= $("#des_list_view");
+			var descriptors = character.descriptors;
+			viewObj.empty();
+			var des_length = descriptors.length;
+			var i = 0;
 			
-		$("#writeClear").click(function(){
-			$('#writeValue').val('');
+			!function outer(i){
+				
+				descriptors[i].read(function(data){
+					var liTplObj=$("#des_tpl").clone();
+					liTplObj.show();
+					
+					for(var key in descriptors[i]){
+						$("[dbField='"+key+"']",liTplObj).html(descriptors[i][key]);
+					}	
+					
+					$("[dbField='value_hex']",liTplObj).html(data.value.getHexString());
+					$("[dbField='value_ascii']",liTplObj).html(data.value.getASCIIString());
+					$("[dbField='value_unicode']",liTplObj).html(data.value.getUnicodeString());
+					viewObj.append(liTplObj);
+						
+					//if read descriptors complete
+					if(i !== descriptors.length - 1){
+						outer(++i);
+					}else{
+						if(character.property.contains("read")){
+							$("#readView").show();
+							$("#readBtn").show().click(function(){
+								character.read(function(chardata){
+									$("#readValue_hex").html(chardata.value.getHexString());
+									$("#readValue_ascii").html(chardata.value.getASCIIString());
+									$("#readValue_unicode").html(chardata.value.getUnicodeString());
+									$("#readDate").html(chardata.date);
+								},app.onGeneralError);
+							});
+						}
+								
+						if(character.property.contains("write") || character.property.contains("writeWithoutResponse")){
+							$("#writeView").show();
+							$("#writeOK").click(function(){		
+								var type = $('input:radio[name="writeType"]:checked').val();
+								character.write(type,$('#writeValue').val(),app.writeCharSuccess,app.onGeneralError);
+							});
+									
+							$("#writeClear").click(function(){
+								$('#writeValue').val('');
+							});
+						}
+							
+						if(character.property.contains("notify")){
+							$("#notifyView").show();
+							$("#subscribe").click(function(){
+								character.subscribe(function(data){
+									$("#notifyValue_hex").html(data.value.getHexString());
+									$("#notifyValue_unicode").html(data.value.getUnicodeString());
+									$("#notifyValue_ascii").html(data.value.getASCIIString());
+									$("#notifyDate").html(data.date);
+								});
+							});
+							$("#unsubscribe").click(function(){character.unsubscribe(function(){alert("unsubscribe success!");})});
+						}
+					}	
+				});
+			}(i)
+		},function(){
+			alert("get descriptors error!");
 		});
-
-		if(character.property.contains("read")){
-			$("#read").show().click(function(){character.read(app.readCharSuccess,app.onGeneralError)});
-		}
-		if(character.property.contains("write") || character.property.contains("writeWithoutResponse")){
-			$("#writeInput").show();
-		}
-		if(character.property.contains("notify")){
-			$("#subscribe").show().click(function(){
-				character.subscribe(app.onNotify);
-			});
-			$("#unsubscribe").show().click(function(){character.unsubscribe(function(){alert("unsubscribe success!");})});
-			$("#notifyData").show();
-		}
-		if(character.property.contains("indicate")){
-			$("#indicate").show().click(app.indicateChar);
-		}
 	},
 
 	readCharSuccess: function(data){
@@ -391,17 +386,6 @@ var app = {
 	
 	writeCharSuccess: function(message){
 		alert("write success! message is:"+JSON.stringify(message));
-	},
-    
-    onNotify:function(data){
-		$("#notifyValue_hex").html(data.value.getHexString());
-		$("#notifyValue_unicode").html(data.value.getUnicodeString());
-		$("#notifyValue_ascii").html(data.value.getASCIIString());
-		$("#notifyDate").html(data.date);
-    },
-	
-	indicateChar: function(){
-		alert("indicate data!");
 	},
 	
 	createService : function(){

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+	<body>
+
+		<div id="content_page" class="container">
+				<div class="searched"> 
+					<img id="switchScan" src="img/searching1.png" class="img-responsive" onclick="app.stopScan()">
+				</div>
+				
+				<div  id="user_view" class="row">
+				</div>
+				
+				<div style="display:none">
+					<ul id="li_tpl" style="overflow:hidden;display:block;margin-top:1em;">
+				  		<li class="dots"><div class="dot"></div></li>
+				  		<li class="content">
+							<div onclick="app.next_page('aaaa','bbbb','cccc')">
+								<p><h3 dbField='deviceName'>Mokai</h3><p>
+								<p>Is Connected: <span dbField='isConnected'>YES</span></p>
+								<p>Device Address: <span dbField='deviceAddress'>902897712-1292716-129128</span></p>
+							</div>
+						</li>
+				  		<li class="prev">
+							<img src="img/prev.png" class="img-responsive" >
+						</li>
+					</ul>
+				</div>
+		</div>
+		<script>
+			$(function(){
+				app.startScan();
+			});
+		</script>
+	</body>
+</html>

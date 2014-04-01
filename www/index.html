@@ -4,7 +4,10 @@
 		<meta charset="utf-8">
 		
 		<title></title>
-		<link rel="stylesheet" href="css/jquery.mobile.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/reset.css">
+		<link rel="stylesheet" href="css/bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="css/bcstyle.css"/>
+		<link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.2.css"/>
 		<script src="js/jquery-1.7.1.min.js"></script>
 		<script src="js/jquery.mobile.min.js"></script>
 		<script src="cordova.js"></script>
@@ -13,50 +16,75 @@
 		<script src="js/index.js"></script>
 		
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<style type="text/css">
+			#cartoon {
+			z-index:1;
+			}
+			#spinner {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				z-index:-999;
+				height: 336px;
+				width: 336px;
+				margin-left:-200px;
+				margin-top:-200px;
+				white-space: nowrap;
+				overflow: hidden;
+				background:url(img/round.png);
+				background-size:100%;
+				-webkit-mask-image: url(img/round.png);
+				-webkit-animation-name: spinnerRotate;
+				-webkit-animation-duration: 1.2s;
+				-webkit-animation-iteration-count: infinite;
+				-webkit-animation-timing-function: linear;
+				
+			}
+			
+			@-webkit-keyframes spinnerRotate {
+				from {
+				    opacity:1;
+					-webkit-transform:rotate(0deg);
+				}
+				to {
+				    opacity:1;
+					-webkit-transform:rotate(360deg);
+				}
+			}
+		</style>
+		
 		<script>
 			$(function(){
+				width = $(window).width();
+				height = $(window).height();
+				$('#logo').css('left',width*(0.5)-82);
+				$('#bcbutton').css('bottom',height*(0.25));
+				setTimeout(function(){
+					$('#logo').css('display','none');
+					$('#bcbutton').fadeIn(3000);
+				},2000);
+				
 				app.initialize();
+				
+				$("#client").click(function(){
+					$.mobile.changePage("searched.html","slideup");
+				});
+				
 			});
-			
 		</script>
-		
-		<style>  
-    		div.ui-slider-switch { width: 7em }  
-		</style> 
 	</head>
 	<body>
-		<div data-role='page' id="content_page">
-			<div data-role='header' data-id="PersistentHeader" data-position="fixed">
-				<h1>BC Explorer</h1>
-				<div data-role="fieldcontain">  
-            		<select name="scan" id="scanOnOff" data-role="slider" >  
-                		<option value="0">Start Scan</option>  
-                		<option value="1" selected="selected">Scanning...</option>  
-            		</select>
-            		
-        		</div>      
-			</div>
-			<div data-role='content'>
-				<a id="createService" href="javascript:void(0)" onclick="app.createService()" data-role="button" style="clear:both; text-align:center;">Create Service!</a>
-				<a id="removeService" href="javascript:void(0)" onclick="app.removeService()" data-role="button" style="clear:both; text-align:center;">Remove Service!</a>
-				<a id="getPairedDevice" href="javascript:void(0)" onclick="app.getPairedDevice()" data-role="button" style="clear:both; text-align:center;">Get All Paired Device!</a>
-				<a id="getConnectedDevice" href="javascript:void(0)" onclick="app.getConnectedDevice()" data-role="button" style="clear:both; text-align:center;">Get All Connected Device!</a>
-				<div id="user_cont" style="clear:both; margin-top:20px;margin-bottom:10px;">
-					<ul data-role='listview' id="user_view">
 
-					</ul>
-					<ul data-role='listview' id="list_model">
-						<li id="li_tpl" style="display:none">
-							<a href="javascript:void(0)" onclick="app.next_page('aaaa','bbbb','cccc')">
-								<p><h1 dbField='deviceName'>Mokai</h1><p>
-								<p>Is Connected: <span dbField='isConnected'>YES</span></p>
-								<p>Device Address: <span dbField='deviceAddress'>902897712-1292716-129128</span></p>
-							</a>
-						</li>
-					</ul>
+		<div data-role ="page" id="content_page" class="container">
+			<div class="container">
+				<img src="img/indexBg.png" class="img-responsive"/>
+				<div id="logo"><img src="img/logo.png" class="img-responsive"/></div>
+				<div id="bcbutton" style="display:none;">
+					<a href="javascript:void(0);" id="client" style="float:left;margin-right:20px;background-color: rgb(227,125,30);">Client</a>
+					<a href="#" style="float:right;">Server</a>
 				</div>
 			</div>
 		</div>
-	
 	</body>
 </html>

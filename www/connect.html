@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<div class="header"> 
+			<img src="img/back.png" class="img-responsive" onclick="window.history.back();">
+			<h1><div id="deviceName"></div></h1>
+		</div>
+		
+		<div id="connect_panel" class="container">
+			<div style="height:80px;"></div>
+			<div class="desc">
+				<p>Device Address: <div id="deviceAddress"></div></p>
+			</div>
+			<div id="user_cont">
+				<div class="btn">
+					<div id="connect">Connect</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="disconnect_panel" class="container" style="display:none;">
+
+				<div style="height:80px;"></div>
+	
+				<div class="desc">
+					<p>Device Address: <div id="service_deviceAddress"></div></p>
+				</div>		
+				<div class="btn">
+					<div style="float:left;padding:0.5em 1em;" onclick="app.disconnectDevice()">Disconnect</div>
+					<div style="float:right;padding:0.5em 1em;" onclick="app.createPair()">Pair</div>
+				</div>
+				
+				<div id="service_view" class="row"></div>
+				
+				<div style="display:none">
+					<ul id="service_tpl" style="overflow:hidden;display:block;margin-top:1em;">
+				  		<li class="dots"><div class="dot"></div></li>
+				  		<li class="content">
+							<div onclick="app.next_page('aaaa','bbbb','cccc')">
+								<p><h3 dbField='name'>Mokai</h3><p>
+								<p>Index: <span dbField='index'></span></p>
+								<p>UUID: <span dbField='uuid'>902897712-1292716-129128</span></p>
+							</div>
+						</li>
+				  		<li class="prev">
+							<img src="img/prev.png" class="img-responsive" >
+						</li>
+					</ul>
+				</div>
+		</div>
+		<script>
+			$(function(){
+				app.deviceViewInit();
+			});
+		</script>
+	</body>
+</html>
