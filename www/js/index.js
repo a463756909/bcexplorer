@@ -52,14 +52,24 @@ var app = {
     },
     
     startScan : function(){
-    	$('#switchScan').attr("src","img/searching1.png");
-    	$('#switchScan').attr("onclick","app.stopScan()");
+    	$('#spinner').attr("src","img/searching.png").addClass('img-responsive spinner').next().show();
+    	$('#spinner').attr("onclick","app.stopScan()");
     	BC.Bluetooth.StartScan();
+    },
+
+    addStartDevice : function(){
+        var deviceList = BC.bluetooth.devices;
+        if(deviceList){
+            for(var deviceKey in deviceList){
+                app.addNewDevice({"deviceAddress":deviceKey});
+            }
+        }
+        app.startScan();
     },
     
     stopScan : function(){
-    	$('#switchScan').attr("src","img/arrow.png");
-    	$('#switchScan').attr("onclick","app.startScan()");
+    	$('#spinner').attr("src","img/arrow.png").removeClass('spinner').next().hide();
+    	$('#spinner').attr("onclick","app.startScan()");
     	BC.Bluetooth.StopScan();
     },
     
@@ -126,7 +136,7 @@ var app = {
 		var viewObj	= $("#user_view");
 		var liTplObj=$("#li_tpl").clone();
 		var newDevice = BC.bluetooth.devices[deviceAddress];
-		$("div",liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
+		$(liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
 		liTplObj.show();
 		
 		for(var key in newDevice){
@@ -155,7 +165,8 @@ var app = {
 	
 	onBluetoothDisconnect: function(arg){
 		alert("device:"+arg.deviceAddress+" is disconnected!");
-		$.mobile.changePage("index.html","slideup");
+        window.clearInterval(interval_rssi);
+		$.mobile.changePage("searched.html","slideup");
 	},
 	
 	onScanStartSuccess: function(list){
@@ -177,32 +188,48 @@ var app = {
 	deviceViewInit: function(){
 		$("#deviceName").html(app.device.deviceName);
 		$("#deviceAddress").html(app.device.deviceAddress);
+		$("#deviceRSSI").html(app.device.RSSI);
+        
+        interval_rssi = window.setInterval(function() {
+                                           app.device.getRSSI(app.getRSSISuccess);
+                                           }, 5000);
+        
 		var isconnect = app.device.isConnected;
 
 		if(isconnect){
 			$("#connect_panel").hide();
 			$("#disconnect_panel").show();
+            
+            app.showLoader("Discovering services...");
 			app.device.discoverServices(function(){
-				app.fillServices();
-			},function(message){alert(message);});
+                app.fillServices();},function(message){
+                app.hideLoader();
+                alert(message);
+                });
 		}
 
 		$("#connect").click(app.connectDevice);
 	},
 	
 	connectDevice: function(){
-		app.showLoader("Connecting and discovering services...");
+		app.showLoader("Connecting ...");
 		app.device.connect(app.connectSuccess,app.connectError);
 	},
     connectError: function(){
-        //app.hideLoader();
+        app.hideLoader();
     },
 	connectSuccess: function(message){
 		$("#connect_panel").fadeOut(200);
 		$("#disconnect_panel").fadeIn(300);
+        
+        app.hideLoader();
+        app.showLoader("Discovering services...");
 		app.device.discoverServices(function(){
 			app.fillServices();
-		},function(message){alert(message);});
+		},function(message){
+                        app.hideLoader();
+                        alert(message);
+        });
 	},
 	
 	disconnectDevice: function(){
@@ -224,10 +251,13 @@ var app = {
 	},
 	
 	disconnectSuccess: function(message){
+        window.clearInterval(interval_rssi);
+		$.mobile.changePage("searched.html","slideup");
 		$("#connect").show();
 		$("#disconnect").hide();
 		$("#service_view").empty();
 		sessionStorage.setItem("isConnected","NO");
+        
 	},
 	
 	fillServices: function(){
@@ -239,7 +269,7 @@ var app = {
 			var service = app.device.services[i];
 			var liTplObj=$("#service_tpl").clone();
 			var serviceIndex = service.index;
-			$("div",liTplObj).attr("onclick","app.getChar('"+serviceIndex+"')");
+			$(liTplObj).attr("onclick","app.getChar('"+serviceIndex+"')");
 			liTplObj.show();
 			
 			for(var key in service){
@@ -273,7 +303,7 @@ var app = {
 		for(var i=0; i<app.device.services[serviceIndex].characteristics.length; i++){
 			var character = app.device.services[serviceIndex].characteristics[i];
 			var liTplObj=$("#char_tpl").clone();
-			$("div",liTplObj).attr("onclick","app.optChar('"+character.index+"')");
+			$(liTplObj).attr("onclick","app.optChar('"+character.index+"')");
 			liTplObj.show();
 			
 			for(var key in character){
@@ -351,7 +381,7 @@ var app = {
 						if(character.property.contains("write") || character.property.contains("writeWithoutResponse")){
 							$("#writeView").show();
 							$("#writeOK").click(function(){		
-								var type = $('input:radio[name="writeType"]:checked').val();
+								var type = $('#writeView .btnAfter').html();
 								character.write(type,$('#writeValue').val(),app.writeCharSuccess,app.onGeneralError);
 							});
 									
@@ -441,7 +471,10 @@ var app = {
 	},
 	
 	getRSSISuccess : function(data){
-		alert(JSON.stringify(data));
+        var strData = JSON.stringify(data);
+        strData = strData.replace('"','');
+        $("#deviceRSSI").html(strData.replace('"',''));
+		
 	},
 	
 	createPair : function(){

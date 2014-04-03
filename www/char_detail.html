@@ -9,30 +9,33 @@
 		<div data-role ="content" id="content_page" class="container">
 			<div style="height:80px;"></div>
 			
-				<div class="device_info">
-					<p>Device Address: <span id="char_deviceAddress"></span></p>
-					<p>Service Name: <span id="service_name"></span></p>
-					<p>Service UUID: <span id="service_uuid"></span></p>
+				<div class="device_info" style="border-buttom:1px solid rgb();">
+					<ul>
+					<li>Device Address: <span id="char_deviceAddress"></span></li>
+					<li>Service Name: <span id="service_name"></span></li>
+					<li>Service UUID: <span id="service_uuid"></span></li>
+					</ul>
 				</div>
 				
-				<div  id="char_view" class="data_view">
-				</div>
-			
-				<ul id="char_tpl" style="overflow:hidden;display:block;margin-top:1em;">
+				<div id="char_view" class="data_view">
+				</div> 
+				
+				<div style="display:none">
+				<ul id="char_tpl" style="overflow:hidden;">
 			  		<li class="dots"><div class="dot"></div></li>
 			  		<li class="content">
-						<div onclick="app.next_page('aaaa','bbbb','cccc')">
-							<p><h3 dbField='name'>Mokai</h3><p>
-							<p>Index: <span dbField='index'></span></p>
-							<p>UUID: <span dbField='uuid'>902897712-1292716-129128</span></p>
-							<p>Property: <span dbField='property'></span></p>
-						</div>
+						<ul onclick="app.next_page('aaaa','bbbb','cccc')">
+							<li><h3 dbField='name'>Mokai</h3></li>
+							<li>Index: <span dbField='index'></span></li>
+							<li>UUID: <span dbField='uuid'>902897712-1292716-129128</span></li>
+							<li>Property: <span dbField='property'></span></li>
+						</ul>
 					</li>
-			  		<li class="prev">
+					<li class="prev">
 						<img src="img/prev.png" class="img-responsive" >
 					</li>
 				</ul>
-		
+			</div>
 		</div>
 		<script>
 			$(function(){

@@ -9,7 +9,7 @@
 		<div id="connect_panel" class="container">
 			<div style="height:80px;"></div>
 			<div class="desc">
-				<p>Device Address: <div id="deviceAddress"></div></p>
+				<p>Device Address: <span id="deviceAddress"></span></p>
 			</div>
 			<div id="user_cont">
 				<div class="btn">
@@ -23,24 +23,27 @@
 				<div style="height:80px;"></div>
 	
 				<div class="desc">
-					<p>Device Address: <div id="service_deviceAddress"></div></p>
+					<p>Device Address: <span id="service_deviceAddress"></span></p>
 				</div>		
 				<div class="btn">
 					<div style="float:left;padding:0.5em 1em;" onclick="app.disconnectDevice()">Disconnect</div>
 					<div style="float:right;padding:0.5em 1em;" onclick="app.createPair()">Pair</div>
 				</div>
-				
+				<div class="rssi">
+					<p>RSSI: <span id="deviceRSSI"></span></p>
+				</div>
+
 				<div id="service_view" class="row"></div>
 				
 				<div style="display:none">
-					<ul id="service_tpl" style="overflow:hidden;display:block;margin-top:1em;">
+					<ul id="service_tpl" style="overflow:hidden;">
 				  		<li class="dots"><div class="dot"></div></li>
 				  		<li class="content">
-							<div onclick="app.next_page('aaaa','bbbb','cccc')">
-								<p><h3 dbField='name'>Mokai</h3><p>
-								<p>Index: <span dbField='index'></span></p>
-								<p>UUID: <span dbField='uuid'>902897712-1292716-129128</span></p>
-							</div>
+							<ul>
+								<li><h3 dbField='name'>Mokai</h3><li>
+								<li>Index: <span dbField='index'></span></li>
+								<li>UUID: <span dbField='uuid'>902897712-1292716-129128</span></li>
+							</ul>
 						</li>
 				  		<li class="prev">
 							<img src="img/prev.png" class="img-responsive" >
@@ -50,6 +53,9 @@
 		</div>
 		<script>
 			$(function(){
+				$("#service_refresh").bind("click",function(){
+					app.fillServices();
+				});
 				app.deviceViewInit();
 			});
 		</script>

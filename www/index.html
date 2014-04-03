@@ -9,6 +9,7 @@
 		<link rel="stylesheet" type="text/css" href="css/bcstyle.css"/>
 		<link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.2.css"/>
 		<script src="js/jquery-1.7.1.min.js"></script>
+		<script src="js/bootstrap.js"></script>
 		<script src="js/jquery.mobile.min.js"></script>
 		<script src="cordova.js"></script>
 		<script type="text/javascript" charset="utf-8" src="underscore.js"></script>
@@ -16,45 +17,15 @@
 		<script src="js/index.js"></script>
 		
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		
-		<style type="text/css">
-			#cartoon {
-			z-index:1;
-			}
-			#spinner {
-				position: absolute;
-				top: 50%;
-				left: 50%;
-				z-index:-999;
-				height: 336px;
-				width: 336px;
-				margin-left:-200px;
-				margin-top:-200px;
-				white-space: nowrap;
-				overflow: hidden;
-				background:url(img/round.png);
-				background-size:100%;
-				-webkit-mask-image: url(img/round.png);
-				-webkit-animation-name: spinnerRotate;
-				-webkit-animation-duration: 1.2s;
-				-webkit-animation-iteration-count: infinite;
-				-webkit-animation-timing-function: linear;
-				
-			}
 			
-			@-webkit-keyframes spinnerRotate {
-				from {
-				    opacity:1;
-					-webkit-transform:rotate(0deg);
-				}
-				to {
-				    opacity:1;
-					-webkit-transform:rotate(360deg);
-				}
-			}
-		</style>
-		
 		<script>
+			window.onload = function(){
+				var spinner = document.getElementById("spinner").clientHeight;
+				sessionStorage.setItem("spinnerHeight",spinner);
+				//$('#word').css('margin-top',-(spinner));
+				$('#spinner').hide();
+			}
+		
 			$(function(){
 				width = $(window).width();
 				height = $(window).height();
@@ -75,14 +46,34 @@
 		</script>
 	</head>
 	<body>
+	
+		<style type="text/css">
 
-		<div data-role ="page" id="content_page" class="container">
+			#word{
+				position: relative;
+			}
+			
+			.word{
+				z-index:-999;
+			}
+			
+			img{
+				display:block;
+			}
+			
+		</style>
+	
+		<div class="container">
+			<div class="searched word">
+				<img id="spinner" src="img/word1.png" class="img-responsive spinner">
+			</div>
+			
 			<div class="container">
 				<img src="img/indexBg.png" class="img-responsive"/>
 				<div id="logo"><img src="img/logo.png" class="img-responsive"/></div>
 				<div id="bcbutton" style="display:none;">
-					<a href="javascript:void(0);" id="client" style="float:left;margin-right:20px;background-color: rgb(227,125,30);">Client</a>
-					<a href="#" style="float:right;">Server</a>
+					<div  id="client" style="float:left;margin-right:20px;background-color: rgb(227,125,30);">Client</div>
+					<div  style="float:right;">Server</div>
 				</div>
 			</div>
 		</div>

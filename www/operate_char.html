@@ -6,77 +6,83 @@
 			<h1><div id="deviceName"></div></h1>
 		</div>
 		
-		<div data-role='content' class="container">
+		<div data-role='content' class="container" id="operate_char">
 			<div style="height:80px;"></div>
 			<div id="user_cont">
-				<div class="desc">
-					<p>Device Address: <div id="operate_char_deviceAddress"></div></p>
-					<p>Service Name: <div id="operate_service_name"></div></p>
-					<p>Service UUID: <div id="operate_service_uuid"></div></p>
-					<p>Characteristic Name: <div id="operate_char_name"></div></p>
-					<p>Characteristic UUID: <div id="operate_char_uuid"></div></p>
-				</div>
+				<ul class="device_info">
+					<li>Device Address: <span id="operate_char_deviceAddress"></span></li>
+					<li>Service Name: <span id="operate_service_name"></span></li>
+					<li>Service UUID: <span id="operate_service_uuid"></span></li>
+					<li>Characteristic Name: <span id="operate_char_name"></span></li>
+					<li>Characteristic UUID: <span id="operate_char_uuid"></span></li>
+				</ul>
 
 				<!-- descriptors view -->
-				<h1>Descriptors</h1>
-				<div id="des_list_view" class="row">
+				<div class="operate_title">Descriptors</div>
+				<div id="des_list_view">
+					
 				</div>
-				<ul id="des_tpl" style="display:none;">
-			  		<li class="dots"><div class="dot"></div></li>
+				<!-- clone -->
+				<ul id="des_tpl" style="display:none">
 			  		<li class="content">
-						<p><b>UUID:</b><span dbField='uuid'></span></p>
-						<p><b>Name:</b><span dbField='name'></span></p>
-						<p><b>Value(HEX):</b><span dbField='value_hex'></span></p>
-						<p><b>Value(ASCII):</b><span dbField='value_ascii'></span></p>
-						<p><b>Value(Unicode):</b><span dbField='value_unicode'></span></p>
-						<p><b>Index:</b><span dbField='index'></span></p>
+			  			<ul>
+							<li><b>UUID:</b><span dbField='uuid'></span></li>
+							<li><b>Name:</b><span dbField='name'></span></li>
+							<li><b>Value(HEX):</b><span dbField='value_hex'></span></li>
+							<li><b>Value(ASCII):</b><span dbField='value_ascii'></span></li>
+							<li><b>Value(Unicode):</b><span dbField='value_unicode'></span></li>
+							<li><b>Index:</b><span dbField='index'></span></li>
+						</ul>
 					</li>
 				</ul>
 				
 				<!-- read view -->
 				<div id="readView" style="display:none">
-					<h1>Read</h1>
-					<b>Read Value(Hex): </b><div id="readValue_hex"></div></br>
-					<b>Read Value(ASCII): </b><div id="readValue_ascii" ></div></br>
-					<b>Read Value(Unicode): </b><div id="readValue_unicode"></div></br>
-					<b>Read Date: </b><div id="readDate"></div>.
-					<a id="readBtn" href="javascript:void(0)" data-role="button" style="display:none">Read Characteristic</a>
+					<div class="operate_title">Read</div>
+					<ul id="des_tpl">
+						<li><b>Read Value(Hex): </b><span id="readValue_hex"></span></li>
+						<li><b>Read Value(ASCII): </b><span id="readValue_ascii" ></span></li>
+						<li><b>Read Value(Unicode): </b><span id="readValue_unicode"></span></li>
+						<li><b>Read Date: </b><span id="readDate"></span></li>
+						<li><div id="readBtn" href="javascript:void(0)" style="">Read Characteristic</div></li>
+					</ul>
 				</div>
 
+				<!-- write view -->
+				<div id="writeView" data-role="fieldcontain" style="display:none">
+					<div class="operate_title">Write</div>
+					<div class="btnCenter">
+						<div class="btnAfter">Hex</div>
+						<div class="writeBtn">ACSII</div>
+						<div class="writeBtn">Unicode</div>
+					</div>
+					<textarea cols="40" rows="6" name="textarea" id="writeValue"></textarea>
+					<div id="writeOK" style="float:right">Write</div>
+				</div>
+				
 				<!-- notify view -->
 				<div id="notifyView" style="display:none">
-					<h1>Notify</h1>
-					<b>Notify Value(Hex): </b><div id="notifyValue_hex"></div></br>
-					<b>Notify Value(ASCII): </b><div id="notifyValue_ascii" ></div></br>
-					<b>Notify Value(Unicode): </b><div id="notifyValue_unicode"></div></br>
-					<b>Notify Date: </b><div id="notifyDate"></div>
-					<a id="subscribe" href="javascript:void(0)" data-role="button">Subscribe</a>
-			 		<a id="unsubscribe" href="javascript:void(0)" data-role="button">Unsubscribe</a>
-				</div>
-			 	
-				<!-- write view -->
-				<div id="writeView" data-role="fieldcontain" style="display:none" >
-					<label for="textarea">Type:</label>
-					<fieldset data-role="controlgroup" data-type="horizontal">
-		 				<input type="radio" name="writeType" id="rdo1" value="Hex" checked="checked"/>
-		 				<label for="rdo1">Hex</label>
-		 				<input type="radio" name="writeType" id="rdo2" value="unicode"/>
-		 				<label for="rdo2">Unicode</label>
-		 				<input type="radio" name="writeType" id="rdo3" value="ASCII"/>
-		 				<label for="rdo3">ASCII</label>
-					</fieldset>
-					</br>
-					<label for="textarea">Value:</label>
-					<textarea cols="40" rows="8" name="textarea" id="writeValue"></textarea>
-					<a id="writeOK" href="javascript:void(0)" data-role="button" >Write</a>
-					<a id="writeClear" href="javascript:void(0)" data-role="button" >Clear</a>
+					<div class="operate_title">Notify</div>
+					<ul id="des_tpl">
+						<li><b>Notify Value(Hex): </b><span id="notifyValue_hex"></span></li>
+						<li><b>Notify Value(ASCII): </b><span id="notifyValue_ascii" ></span></li>
+						<li><b>Notify Value(Unicode): </b><span id="notifyValue_unicode"></span></li>
+						<li><b>Notify Date: </b><span id="notifyDate"></span></li>
+					</ul>
+					<div class="btnCenter">
+						<div id="subscribe">Subscribe</div>
+						<div id="unsubscribe">Unsubscribe</div>
+					</div>
 				</div>
 				
 			</div>
 		</div>
-	
 		<script>
 			$(function(){
+				$(".btnCenter div").click(function(){
+					$(this).attr('class','btnAfter').siblings('div').attr('class','writeBtn');
+				});
+				//alert($(".btnCenter .btnAfter").html());
 				app.operateCharViewInit();
 			});
 		</script>
