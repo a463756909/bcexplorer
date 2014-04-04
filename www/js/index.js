@@ -52,8 +52,9 @@ var app = {
     },
     
     startScan : function(){
-    	$('#spinner').attr("src","img/searching.png").addClass('img-responsive spinner').next().show();
-    	$('#spinner').attr("onclick","app.stopScan()");
+        //alert(111);
+    	$('img#spinner').attr("src","img/searching.png").addClass('img-responsive spinner').next().show();
+    	$('img#spinner').attr("onclick","app.stopScan()");
     	BC.Bluetooth.StartScan();
     },
 
@@ -68,8 +69,8 @@ var app = {
     },
     
     stopScan : function(){
-    	$('#spinner').attr("src","img/arrow.png").removeClass('spinner').next().hide();
-    	$('#spinner').attr("onclick","app.startScan()");
+    	$('img#spinner').attr("src","img/arrow.png").removeClass('spinner').next().hide();
+    	$('img#spinner').attr("onclick","app.startScan()");
     	BC.Bluetooth.StopScan();
     },
     
@@ -86,12 +87,10 @@ var app = {
 	
 	onBluetoothStateChange : function(){
 		if(BC.bluetooth.isopen){
-			alert("your bluetooth has been opened successfully.");
 			var scanOnOff = $("#scanOnOff");
 			scanOnOff[0].selectedIndex = 0;
 			scanOnOff.slider("refresh");
 		}else{
-			alert("bluetooth is closed!");
 			BC.Bluetooth.OpenBluetooth(function(){alert("opened!");});
 		}
 	},
@@ -164,7 +163,6 @@ var app = {
 	},
 	
 	onBluetoothDisconnect: function(arg){
-		alert("device:"+arg.deviceAddress+" is disconnected!");
         window.clearInterval(interval_rssi);
 		$.mobile.changePage("searched.html","slideup");
 	},
@@ -365,49 +363,49 @@ var app = {
 					//if read descriptors complete
 					if(i !== descriptors.length - 1){
 						outer(++i);
-					}else{
-						if(character.property.contains("read")){
-							$("#readView").show();
-							$("#readBtn").show().click(function(){
-								character.read(function(chardata){
-									$("#readValue_hex").html(chardata.value.getHexString());
-									$("#readValue_ascii").html(chardata.value.getASCIIString());
-									$("#readValue_unicode").html(chardata.value.getUnicodeString());
-									$("#readDate").html(chardata.date);
-								},app.onGeneralError);
-							});
-						}
-								
-						if(character.property.contains("write") || character.property.contains("writeWithoutResponse")){
-							$("#writeView").show();
-							$("#writeOK").click(function(){		
-								var type = $('#writeView .btnAfter').html();
-								character.write(type,$('#writeValue').val(),app.writeCharSuccess,app.onGeneralError);
-							});
-									
-							$("#writeClear").click(function(){
-								$('#writeValue').val('');
-							});
-						}
-							
-						if(character.property.contains("notify")){
-							$("#notifyView").show();
-							$("#subscribe").click(function(){
-								character.subscribe(function(data){
-									$("#notifyValue_hex").html(data.value.getHexString());
-									$("#notifyValue_unicode").html(data.value.getUnicodeString());
-									$("#notifyValue_ascii").html(data.value.getASCIIString());
-									$("#notifyDate").html(data.date);
-								});
-							});
-							$("#unsubscribe").click(function(){character.unsubscribe(function(){alert("unsubscribe success!");})});
-						}
-					}	
+					}
 				});
 			}(i)
 		},function(){
 			alert("get descriptors error!");
 		});
+        
+        if(character.property.contains("read")){
+            $("#readView").show();
+            $("#readBtn").show().click(function(){
+                                       character.read(function(chardata){
+                                                      $("#readValue_hex").html(chardata.value.getHexString());
+                                                      $("#readValue_ascii").html(chardata.value.getASCIIString());
+                                                      $("#readValue_unicode").html(chardata.value.getUnicodeString());
+                                                      $("#readDate").html(chardata.date);
+                                                      },app.onGeneralError);
+                                       });
+        }
+        
+        if(character.property.contains("write") || character.property.contains("writeWithoutResponse")){
+            $("#writeView").show();
+            $("#writeOK").click(function(){
+								var type = $('#writeView .btnAfter').html();
+								character.write(type,$('#writeValue').val(),app.writeCharSuccess,app.onGeneralError);
+                                });
+            
+            $("#writeClear").click(function(){
+                                   $('#writeValue').val('');
+                                   });
+        }
+        
+        if(character.property.contains("notify")){
+            $("#notifyView").show();
+            $("#subscribe").click(function(){
+                                  character.subscribe(function(data){
+                                                      $("#notifyValue_hex").html(data.value.getHexString());
+                                                      $("#notifyValue_unicode").html(data.value.getUnicodeString());
+                                                      $("#notifyValue_ascii").html(data.value.getASCIIString());
+                                                      $("#notifyDate").html(data.date);
+                                                      });
+                                  });
+            $("#unsubscribe").click(function(){character.unsubscribe(function(){alert("unsubscribe success!");})});
+        }
 	},
 
 	readCharSuccess: function(data){

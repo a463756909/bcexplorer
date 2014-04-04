@@ -26,8 +26,14 @@
 					<p>Device Address: <span id="service_deviceAddress"></span></p>
 				</div>		
 				<div class="btn">
-					<div style="float:left;padding:0.5em 1em;" onclick="app.disconnectDevice()">Disconnect</div>
-					<div style="float:right;padding:0.5em 1em;" onclick="app.createPair()">Pair</div>
+					<div style="float:left;width:40%;font-size:0px;" onclick="app.disconnectDevice()">
+                        <img src="img/disconnect.png" style="display:block;margin:0px;border:0px;width:100%;height:100%;"  />
+                       
+                    </div>
+                    
+					<div style="float:right;width:40%;font-size:0px;" onclick="app.createPair()">
+                       <img src="img/pair.png" style = "display:block;text-align:center; width:100%;height:100%;">
+                    </div>
 				</div>
 				<div class="rssi">
 					<p>RSSI: <span id="deviceRSSI"></span></p>

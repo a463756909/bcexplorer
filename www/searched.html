@@ -9,6 +9,7 @@
 			}
 			#word{
 				position: relative;
+				z-index:-999;
 			}
 			.spinner {
 				z-index:9999;
@@ -37,10 +38,13 @@
 		</style>
 		
 		<div class="container">
-				<div class="searched" id="switchScan">
-					<img id="spinner" style="display:block;" src="img/searching.png" class="img-responsive spinner" onclick="app.stopScan()">
+               <div class="imgBack" style="float:left;">
+                   <img src="img/back.png"  onclick="window.history.back();">
+              </div>
+               
+				<div class="searched">
+					<img id="spinner" style="display:block;" src="img/searching.png" class="img-responsive spinner" >
 					<img id="word" src="img/word.png" class="img-responsive">
-					
 				</div>
 				
 				<div  id="user_view" class="row">
@@ -50,10 +54,10 @@
 					<ul id="li_tpl" style="overflow:hidden;">
 				  		<li class="dots"><div class="dot"></div></li>
 				  		<li class="content">
-							<ul onclick="app.next_page('aaaa','bbbb','cccc')">
-								<li><h3 dbField='deviceName'>Mokai</h3><li>
-								<li>Is Connected: <span dbField='isConnected'>YES</span></li>
-								<li>Device Address: <span dbField='deviceAddress'>902897712-1292716-129128</span></li>
+							<ul>
+								<li><h3 dbField='deviceName'></h3><li>
+								<li>Is Connected: <span dbField='isConnected'></span></li>
+								<li>Device Address: <span dbField='deviceAddress'></span></li>
 							</ul>
 						</li>
 				  		<li class="prev">
@@ -65,7 +69,7 @@
 		<script>
 			$(function(){
 				var spinner = sessionStorage.getItem("spinnerHeight");
-				$('#word').css('margin-top',-(spinner));
+				$('#word').css({'margin-top':-(spinner),'z-index':-999});
 				app.addStartDevice();
 			});
 		</script>
