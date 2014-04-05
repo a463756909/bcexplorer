@@ -23,7 +23,7 @@
 				var spinner = document.getElementById("spinner").clientHeight;
 				sessionStorage.setItem("spinnerHeight",spinner);
 				//$('#word').css('margin-top',-(spinner));
-				$('#spinner').hide();
+				$('#word').remove();
 			}
 		
 			$(function(){
@@ -73,9 +73,9 @@
 		</style>
         
            <div class="container">
-			<div class="searched word">
+			  <div id="word" class="searched word">
 				<img id="spinner" src="img/word1.png" class="img-responsive spinner">
-			</div>
+			  </div>
             
 			<div class="container">
 				<img src="img/indexBg.png" class="img-responsive"/>
