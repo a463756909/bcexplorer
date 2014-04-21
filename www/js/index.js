@@ -25,15 +25,6 @@ var app = {
     
     bindCordovaEvents: function() {
         document.addEventListener('bcready', app.onBCReady, false);
-		document.addEventListener('deviceconnected', app.onDeviceConnected, false);
-		document.addEventListener('devicedisconnected', app.onBluetoothDisconnect, false);
-		document.addEventListener('newdevice', app.addNewDevice, false);
-		document.addEventListener('bluetoothstatechange', app.onBluetoothStateChange, false);
-		document.addEventListener('onsubscribestatechange', app.onSubscribeStateChange, false);
-		document.addEventListener('oncharacteristicread', app.onCharacteristicRead, false);
-		document.addEventListener('oncharacteristicwrite', app.onCharacteristicWrite, false);
-		document.addEventListener('ondescriptorread', app.onDescriptorRead, false);
-		document.addEventListener('ondescriptorwrite', app.onDescriptorWrite, false);
     },
     
 	onDeviceConnected : function(arg){
@@ -75,6 +66,8 @@ var app = {
     },
     
     onBCReady: function() {
+		document.addEventListener('bluetoothstatechange', app.onBluetoothStateChange, false);
+		BC.bluetooth.addEventListener("newdevice",app.addNewDevice);
 		if(!BC.bluetooth.isopen){
 			if(API !== "ios"){
 				BC.Bluetooth.OpenBluetooth(function(){
@@ -130,11 +123,13 @@ var app = {
 		alert(JSON.stringify(arg));
 	},
 	
-	addNewDevice: function(arg){
-		var deviceAddress = arg.deviceAddress;
+	addNewDevice: function(s){
+		var newDevice = s.target;
+		newDevice.addEventListener("deviceconnected",app.onDeviceConnected);
+		newDevice.addEventListener("devicedisconnected",app.onDeviceDisconnected);
+		
 		var viewObj	= $("#user_view");
 		var liTplObj=$("#li_tpl").clone();
-		var newDevice = BC.bluetooth.devices[deviceAddress];
 		$(liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
 		liTplObj.show();
 		
@@ -373,37 +368,37 @@ var app = {
         if(character.property.contains("read")){
             $("#readView").show();
             $("#readBtn").show().click(function(){
-                                       character.read(function(chardata){
-                                                      $("#readValue_hex").html(chardata.value.getHexString());
-                                                      $("#readValue_ascii").html(chardata.value.getASCIIString());
-                                                      $("#readValue_unicode").html(chardata.value.getUnicodeString());
-                                                      $("#readDate").html(chardata.date);
-                                                      },app.onGeneralError);
-                                       });
+                character.read(function(chardata){
+                    $("#readValue_hex").html(chardata.value.getHexString());
+                    $("#readValue_ascii").html(chardata.value.getASCIIString());
+                    $("#readValue_unicode").html(chardata.value.getUnicodeString());
+                    $("#readDate").html(chardata.date);
+                },app.onGeneralError);
+             });
         }
         
         if(character.property.contains("write") || character.property.contains("writeWithoutResponse")){
             $("#writeView").show();
             $("#writeOK").click(function(){
-								var type = $('#writeView .btnAfter').html();
-								character.write(type,$('#writeValue').val(),app.writeCharSuccess,app.onGeneralError);
-                                });
+				var type = $('#writeView .btnAfter').html();
+				character.write(type,$('#writeValue').val(),app.writeCharSuccess,app.onGeneralError);
+            });
             
             $("#writeClear").click(function(){
-                                   $('#writeValue').val('');
-                                   });
+                $('#writeValue').val('');
+            });
         }
         
         if(character.property.contains("notify")){
             $("#notifyView").show();
             $("#subscribe").click(function(){
-                                  character.subscribe(function(data){
-                                                      $("#notifyValue_hex").html(data.value.getHexString());
-                                                      $("#notifyValue_unicode").html(data.value.getUnicodeString());
-                                                      $("#notifyValue_ascii").html(data.value.getASCIIString());
-                                                      $("#notifyDate").html(data.date);
-                                                      });
-                                  });
+                character.subscribe(function(data){
+                    $("#notifyValue_hex").html(data.value.getHexString());
+                    $("#notifyValue_unicode").html(data.value.getUnicodeString());
+                    $("#notifyValue_ascii").html(data.value.getASCIIString());
+                    $("#notifyDate").html(data.date);
+                });
+            });
             $("#unsubscribe").click(function(){character.unsubscribe(function(){alert("unsubscribe success!");})});
         }
 	},
@@ -417,16 +412,18 @@ var app = {
 	},
 	
 	createService : function(){
-	
-		var service = BC.Bluetooth.CreateService("0000ffe0-0000-1000-8000-00805f9b34fb");
+		var service = new BC.Service({"uuid":"ffe0"});
 		var property = ["read","write","notify"];
 		var permission = ["read","write"];
-		var onMyWriteRequestName = "myWriteRequest";
-		var onMyReadRequestName = "myReadRequest";
-		var character1 = BC.Bluetooth.CreateCharacteristic("0000ffe1-0000-1000-8000-00805f9b34fb","01","Hex",property,permission);
-		var character2 = BC.Bluetooth.CreateCharacteristic("0000fff2-0000-1000-8000-00805f9b34fb","00","Hex",property,permission);
-		var descriptor1 = BC.Bluetooth.CreateDescriptor("00002901-0000-1000-8000-00805f9b34fb","00","Hex",permission);
-		var descriptor2 = BC.Bluetooth.CreateDescriptor("00002902-0000-1000-8000-00805f9b34fb","08","Hex",permission);
+		var character1 = new BC.Characteristic({uuid:"ffe1",value:"01",type:"Hex",property:property,permission:permission});
+		character1.addEventListener("onsubscribestatechange",function(s){alert("onsubscribestatechange : (" + s.uuid + ") state:" + s.isSubscribed);});
+		character1.addEventListener("oncharacteristicread",function(s){alert("oncharacteristicread : (" + s.uuid + ")");});
+		character1.addEventListener("oncharacteristicwrite",function(s){alert("oncharacteristicwrite : (" + s.uuid + ") writeValue:" + s.writeValue.getHexString());});
+		var character2 = new BC.Characteristic({uuid:"ffe2",value:"00",type:"Hex",property:property,permission:permission});
+		var descriptor1 = new BC.Descriptor({uuid:"2901",value:"00",type:"Hex",permission:permission});
+		descriptor1.addEventListener("ondescriptorread",function(s){alert("ondescriptorread : " + s.uuid);});
+		descriptor1.addEventListener("ondescriptorwrite",function(s){alert("ondescriptorwrite : " + s.uuid);});
+		var descriptor2 = new BC.Descriptor({uuid:"2902",value:"08",type:"Hex",permission:permission});
 		character1.addDescriptor(descriptor1);
 		character1.addDescriptor(descriptor2);
 		service.addCharacteristic(character1);
