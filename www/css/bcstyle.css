@@ -309,3 +309,35 @@ p,li{
 .container #notifyView{
 	height: 10em;
 }
+
+/*createSocket*/
+
+#createSocket_panel{
+	margin-top:80px;
+}
+
+
+#createService_panel #createService_cont .info{
+	margin-top: 50px;
+}
+
+#createService_panel #createService_cont div span{
+	display: block;
+	word-warp:break-word;
+    word-break:break-all;
+    color: rgb(255,255,255);
+}
+
+.btn_panel{
+	margin-top:20px;
+	padding-bottom: 10px;
+}
+
+.btn_panel div{
+	padding:1em 1.3em;
+	margin-left:5px;
+	border-radius: 6px;
+	text-align: center;
+	color:rgb(255,255,255);
+	border: 1px solid rgb(227,125,30);
+}
