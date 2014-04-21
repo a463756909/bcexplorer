@@ -52,9 +52,9 @@ var app = {
     addStartDevice : function(){
         var deviceList = BC.bluetooth.devices;
         if(deviceList){
-            for(var deviceKey in deviceList){
-                app.addNewDevice({"deviceAddress":deviceKey});
-            }
+        	_.each(deviceList, function(device){
+				app.addDeviceToUI(device);
+			});
         }
         app.startScan();
     },
@@ -127,7 +127,10 @@ var app = {
 		var newDevice = s.target;
 		newDevice.addEventListener("deviceconnected",app.onDeviceConnected);
 		newDevice.addEventListener("devicedisconnected",app.onDeviceDisconnected);
-		
+		app.addDeviceToUI(newDevice);
+	},
+	
+	addDeviceToUI : function(newDevice){
 		var viewObj	= $("#user_view");
 		var liTplObj=$("#li_tpl").clone();
 		$(liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
@@ -157,7 +160,7 @@ var app = {
 		}
 	},
 	
-	onBluetoothDisconnect: function(arg){
+	onDeviceDisconnected: function(arg){
         window.clearInterval(interval_rssi);
 		$.mobile.changePage("searched.html","slideup");
 	},
