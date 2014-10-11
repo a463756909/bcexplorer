@@ -16,8 +16,9 @@
 var serviceUniqueID = "";
 var interval_notify_index = "";
 var app = {
-
-    // Application Constructor
+	interval_rssi:null,
+	num:1,
+    
     initialize: function() {
         app.bindCordovaEvents();
         app.bindUIEvents();
@@ -26,16 +27,64 @@ var app = {
     bindCordovaEvents: function() {
         document.addEventListener('bcready', app.onBCReady, false);
     },
-    
-	onDeviceConnected : function(arg){
-		var deviceAddress = arg.deviceAddress;
-		//alert("device:"+deviceAddress+" is connected!");
-	},
-	
-    bindUIEvents: function(){
+
+     bindUIEvents: function(){
     	$('#scanOnOff').change(app.startORstopScan); 
     },
+
+    onBCReady: function() {
+    	var BC = window.BC = cordova.require("org.bcsphere.bcjs");
+		var _ = window._ = cordova.require("org.underscorejs.underscore");
+		document.addEventListener('bluetoothstatechange', app.onBluetoothStateChange, false);
+		BC.bluetooth.addEventListener("newdevice",app.addNewDevice);
+		if(!BC.bluetooth.isopen){
+			if(API !== "ios"){
+				BC.Bluetooth.OpenBluetooth(function(){
+					console.log("open success!!");
+				});
+			}else{					
+				alert("Please open your bluetooth first.");
+			}
+		}
+    },
+
+    addNewDevice: function(s){
+		var newDevice = s.target;
+		newDevice.addEventListener("deviceconnected",app.onDeviceConnected);
+		newDevice.addEventListener("devicedisconnected",app.onDeviceDisconnected);
+		app.addDeviceToUI(newDevice);
+	},
+
+	onDeviceConnected : function(arg){
+		var deviceAddress = arg.deviceAddress;
+		console.log("device:"+deviceAddress+" is connected!");
+	},
+	
+	onDeviceDisconnected: function(arg){
+		if(app.interval_rssi!=null)
+        window.clearInterval(app.interval_rssi);
+		$.mobile.changePage("searched.html","slideup");
+	},
     
+    addDeviceToUI : function(newDevice){
+		var viewObj	= $("#user_view");//do what
+		var liTplObj=$("#li_tpl").clone();
+		$(liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
+		liTplObj.show();
+		
+		for(var key in newDevice){
+			if(key == "isConnected"){
+				if(newDevice.isConnected){
+					$("[dbField='"+key+"']",liTplObj).html("YES");
+				}
+				$("[dbField='"+key+"']",liTplObj).html("NO");
+			}else{
+				$("[dbField='"+key+"']",liTplObj).html(newDevice[key]);
+			}
+		}
+		viewObj.append(liTplObj);
+	},
+	
     device_page: function(deviceAddress){
     	app.device = BC.bluetooth.devices[deviceAddress];
 		BC.Bluetooth.StopScan();
@@ -58,26 +107,13 @@ var app = {
         }
         app.startScan();
     },
-    
+
     stopScan : function(){
     	$('img#spinner').attr("src","img/arrow.png").removeClass('spinner').next().hide();
     	$('img#spinner').attr("onclick","app.startScan()");
     	BC.Bluetooth.StopScan();
     },
     
-    onBCReady: function() {
-		document.addEventListener('bluetoothstatechange', app.onBluetoothStateChange, false);
-		BC.bluetooth.addEventListener("newdevice",app.addNewDevice);
-		if(!BC.bluetooth.isopen){
-			if(API !== "ios"){
-				BC.Bluetooth.OpenBluetooth(function(){
-				});
-			}else{					
-				alert("Please open your bluetooth first.");
-			}
-		}
-    },
-	
 	onBluetoothStateChange : function(){
 		if(BC.bluetooth.isopen){
 			var scanOnOff = $("#scanOnOff");
@@ -88,85 +124,8 @@ var app = {
 		}
 	},
 	
-	onSubscribeStateChange : function(arg){
-		var service = BC.bluetooth.services[arg.uniqueID];
-		var character = service.characteristics[arg.characteristicIndex];
-		if(character.isSubscribed){
-			var data = new Uint8Array(128);
-			for (var i = 0; i < 128; i++) {
-				data[i] = '2';
-			}
-			window.setTimeout(function(){
-				interval_notify_index = window.setInterval(function() {
-					character.notify('raw',data,function(){alert("notify success!")},function(){alert("notify error!")});
-				}, 5000);
-			},2000);
-		}else{
-			window.clearInterval(interval_notify_index);
-			alert("stop notify success!");
-		}
-	},
-	
-	onCharacteristicRead : function(arg){
-		alert(JSON.stringify(arg));
-	},
-	
-	onCharacteristicWrite : function(arg){
-		alert(JSON.stringify(arg));
-	},
-	
-	onDescriptorRead : function(arg){
-		alert(JSON.stringify(arg));
-	},
-	
-	ondescriptorwrite : function(arg){
-		alert(JSON.stringify(arg));
-	},
-	
-	addNewDevice: function(s){
-		var newDevice = s.target;
-		newDevice.addEventListener("deviceconnected",app.onDeviceConnected);
-		newDevice.addEventListener("devicedisconnected",app.onDeviceDisconnected);
-		app.addDeviceToUI(newDevice);
-	},
-	
-	addDeviceToUI : function(newDevice){
-		var viewObj	= $("#user_view");
-		var liTplObj=$("#li_tpl").clone();
-		$(liTplObj).attr("onclick","app.device_page('"+newDevice.deviceAddress+"')");
-		liTplObj.show();
-		
-		for(var key in newDevice){
-			if(key == "isConnected"){
-				if(newDevice.isConnected){
-					$("[dbField='"+key+"']",liTplObj).html("YES");
-				}
-				$("[dbField='"+key+"']",liTplObj).html("NO");
-			}else{
-				$("[dbField='"+key+"']",liTplObj).html(newDevice[key]);
-			}
-		}
-		viewObj.append(liTplObj);
-	},
-	
-	seeAdvData: function(){
-		var device = BC.bluetooth.devices[app.device.deviceAddress];
-		//alert(device.advertisementData.manufacturerData);
-		alert(JSON.stringify(device.advertisementData));
-		if(device.advertisementData.manufacturerData){
-			alert("ManufacturerData(Hex):"+app.device.advertisementData.manufacturerData.getHexString()+"\n"+
-			  "ManufacturerData(ASCII):"+app.device.advertisementData.manufacturerData.getASCIIString()+"\n"+
-			  "ManufacturerData(Unicode):"+app.device.advertisementData.manufacturerData.getUnicodeString());
-		}
-	},
-	
-	onDeviceDisconnected: function(arg){
-        window.clearInterval(interval_rssi);
-		$.mobile.changePage("searched.html","slideup");
-	},
-	
 	onScanStartSuccess: function(list){
-		//alert(list);
+		//alert(list)
 	},	
 	
 	onScanStopSuccess: function(result){
@@ -176,17 +135,16 @@ var app = {
 	onGeneralSuccess: function(result){
 		alert(result.mes);
 	},
-
-    onGeneralError: function(message){
-		alert(message.mes);
-	},
 	
 	deviceViewInit: function(){
+
+		$("#connect").click(app.connectDevice);
+
 		$("#deviceName").html(app.device.deviceName);
 		$("#deviceAddress").html(app.device.deviceAddress);
 		$("#deviceRSSI").html(app.device.RSSI);
-        
-        interval_rssi = window.setInterval(function() {
+         
+        app.interval_rssi = window.setInterval(function() {
                                            app.device.getRSSI(app.getRSSISuccess);
                                            }, 5000);
         
@@ -203,18 +161,31 @@ var app = {
                 alert(message);
                 });
 		}
-
-		$("#connect").click(app.connectDevice);
 	},
 	
+	getRSSI : function(){
+		app.device.getRSSI(app.getRSSISuccess);
+	},
+	
+	getRSSISuccess : function(data){
+        var strData = JSON.stringify(data);
+        strData = strData.replace('"','');
+        $("#deviceRSSI").html(strData.replace('"',''));	
+	},
+
 	connectDevice: function(){
+		console.log("start connecting");
 		app.showLoader("Connecting ...");
 		app.device.connect(app.connectSuccess,app.connectError);
 	},
     connectError: function(){
+    	console.log("try again"+app.num++);
         app.hideLoader();
     },
+
 	connectSuccess: function(message){
+		sessionStorage.setItem("isConnected","YES");
+		console.log("connect success");
 		$("#connect_panel").fadeOut(200);
 		$("#disconnect_panel").fadeIn(300);
         
@@ -247,7 +218,8 @@ var app = {
 	},
 	
 	disconnectSuccess: function(message){
-        window.clearInterval(interval_rssi);
+		if(app.interval_rssi!=null)
+        window.clearInterval(app.interval_rssi);
 		$.mobile.changePage("searched.html","slideup");
 		$("#connect").show();
 		$("#disconnect").hide();
@@ -269,7 +241,16 @@ var app = {
 			liTplObj.show();
 			
 			for(var key in service){
-				$("[dbField='"+key+"']",liTplObj).html(service[key]);
+				if(key=="name"){
+					if(service[key]=="unknown"){
+						$("[dbField='"+key+"']",liTplObj).html("service"+(parseInt(serviceIndex,10)+1));
+					}else{
+						$("[dbField='"+key+"']",liTplObj).html(service[key]);
+					}
+				}else{
+					$("[dbField='"+key+"']",liTplObj).html(service[key]);
+				}
+				
 			}	
 
 			viewObj.append(liTplObj);
@@ -292,14 +273,20 @@ var app = {
 		var serviceIndex = sessionStorage.getItem("serviceIndex");
 		$("#char_deviceName").html(app.device.deviceName);
 		$("#char_deviceAddress").html(app.device.deviceAddress);
-		$("#service_name").html(app.device.services[serviceIndex].name);
+		
+		if(app.device.services[serviceIndex].name=="unknown"){
+			$("#service_name").html("service"+(parseInt(serviceIndex,10)+1));
+		}else{
+			$("#service_name").html(app.device.services[serviceIndex].name);
+		}
 		$("#service_uuid").html(app.device.services[serviceIndex].uuid);
 		
 		var viewObj	= $("#char_view");
 		for(var i=0; i<app.device.services[serviceIndex].characteristics.length; i++){
 			var character = app.device.services[serviceIndex].characteristics[i];
+			var characterIndex = character.index;
 			var liTplObj=$("#char_tpl").clone();
-			$(liTplObj).attr("onclick","app.optChar('"+character.index+"')");
+			$(liTplObj).attr("onclick","app.optChar('"+characterIndex+"')");
 			liTplObj.show();
 			
 			for(var key in character){
@@ -311,6 +298,12 @@ var app = {
 					}
 				);
 					$("[dbField='"+key+"']",liTplObj).html(propertyStr);
+				}else if(key=="name"){
+					if(character[key]=="unknown"){
+						$("[dbField='"+key+"']",liTplObj).html("character"+(parseInt(characterIndex,10)+1));
+					}else{
+						$("[dbField='"+key+"']",liTplObj).html(character[key]);
+					}
 				}else{
 					$("[dbField='"+key+"']",liTplObj).html(character[key]);
 				}
@@ -331,9 +324,21 @@ var app = {
 		var character = service.characteristics[characterIndex];
 		$("#deviceName").html(app.device.deviceName);
 		$("#operate_char_deviceAddress").html(app.device.deviceAddress);
-		$("#operate_service_name").html(service.name);
+
+		if(service.name=="unknown"){
+			$("#operate_service_name").html("service"+(parseInt(serviceIndex,10)+1));
+		}else{
+			$("#operate_service_name").html(service.name);
+		}
+
 		$("#operate_service_uuid").html(service.uuid);
-		$("#operate_char_name").html(character.name);
+
+		if(character.name=="unknown"){
+			$("#operate_char_name").html("character"+(parseInt(characterIndex,10)+1));
+		}else{
+			$("#operate_char_name").html(character.name);
+		}
+		
 		$("#operate_char_uuid").html(character.uuid);
 		
 		character.discoverDescriptors(function(){
@@ -350,7 +355,16 @@ var app = {
 					liTplObj.show();
 					
 					for(var key in descriptors[i]){
-						$("[dbField='"+key+"']",liTplObj).html(descriptors[i][key]);
+						if(key=="name"){
+							if(descriptors[i][key]=="unknown"){
+								$("[dbField='"+key+"']",liTplObj).html("descriptor"+(i+1));
+							}else{
+								$("[dbField='"+key+"']",liTplObj).html(descriptors[i][key]);
+							}
+						}else{
+							$("[dbField='"+key+"']",liTplObj).html(descriptors[i][key]);
+						}
+						
 					}	
 					
 					$("[dbField='value_hex']",liTplObj).html(data.value.getHexString());
@@ -406,12 +420,62 @@ var app = {
         }
 	},
 
-	readCharSuccess: function(data){
-		alert("Read Content(HEX):"+data.value.getHexString()+"\nRead Content(ACSII):"+data.value.getASCIIString()+"\nRead Content(Unicode):"+data.value.getUnicodeString()+"\nRead Time:"+data.date);
+	 onGeneralError: function(message){
+		alert(message.mes);
 	},
+
+	// readCharSuccess: function(data){
+	// 	alert("Read Content(HEX):"+data.value.getHexString()+"\nRead Content(ACSII):"+data.value.getASCIIString()+"\nRead Content(Unicode):"+data.value.getUnicodeString()+"\nRead Time:"+data.date);
+	// },
 	
 	writeCharSuccess: function(message){
 		alert("write success! message is:"+JSON.stringify(message));
+	},
+
+	onSubscribeStateChange : function(arg){
+		var service = BC.bluetooth.services[arg.uniqueID];
+		var character = service.characteristics[arg.characteristicIndex];
+		if(character.isSubscribed){
+			var data = new Uint8Array(128);
+			for (var i = 0; i < 128; i++) {
+				data[i] = '2';
+			}
+			window.setTimeout(function(){
+				interval_notify_index = window.setInterval(function() {
+					character.notify('raw',data,function(){alert("notify success!")},function(){alert("notify error!")});
+				}, 5000);
+			},2000);
+		}else{
+			window.clearInterval(interval_notify_index);
+			alert("stop notify success!");
+		}
+	},
+	
+	onCharacteristicRead : function(arg){
+		alert(JSON.stringify(arg));
+	},
+	
+	onCharacteristicWrite : function(arg){
+		alert(JSON.stringify(arg));
+	},
+	
+	onDescriptorRead : function(arg){
+		alert(JSON.stringify(arg));
+	},
+	
+	ondescriptorwrite : function(arg){
+		alert(JSON.stringify(arg));
+	},
+	
+	seeAdvData: function(){
+		var device = BC.bluetooth.devices[app.device.deviceAddress];
+		//alert(device.advertisementData.manufacturerData);
+		alert(JSON.stringify(device.advertisementData));
+		if(device.advertisementData.manufacturerData){
+			alert("ManufacturerData(Hex):"+app.device.advertisementData.manufacturerData.getHexString()+"\n"+
+			  "ManufacturerData(ASCII):"+app.device.advertisementData.manufacturerData.getASCIIString()+"\n"+
+			  "ManufacturerData(Unicode):"+app.device.advertisementData.manufacturerData.getUnicodeString());
+		}
 	},
 	
 	createService : function(){
@@ -462,17 +526,6 @@ var app = {
 	
 	getConnectedDevice : function(){
 		BC.Bluetooth.GetConnectedDevices(function(mes){alert(JSON.stringify(mes));},function(mes){alert(JSON.stringify(mes));});
-	},
-	
-	getRSSI : function(){
-		app.device.getRSSI(app.getRSSISuccess);
-	},
-	
-	getRSSISuccess : function(data){
-        var strData = JSON.stringify(data);
-        strData = strData.replace('"','');
-        $("#deviceRSSI").html(strData.replace('"',''));
-		
 	},
 	
 	createPair : function(){

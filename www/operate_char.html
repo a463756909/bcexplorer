@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<body>
-		<div class="header"> 
+		<div class="header imgBack"> 
 			<img src="img/back.png" class="img-responsive" onclick="window.history.back();">
 			<h1><div id="deviceName"></div></h1>
 		</div>
@@ -10,11 +10,11 @@
 			<div style="height:80px;"></div>
 			<div id="user_cont">
 				<ul class="device_info">
-					<li>Device Address: <span id="operate_char_deviceAddress"></span></li>
+					<li>Device Address: <span id="operate_char_deviceAddress"class="uuidSize"></span></li>
 					<li>Service Name: <span id="operate_service_name"></span></li>
-					<li>Service UUID: <span id="operate_service_uuid"></span></li>
+					<li>Service UUID: <span id="operate_service_uuid" class="uuidSize"></span></li>
 					<li>Characteristic Name: <span id="operate_char_name"></span></li>
-					<li>Characteristic UUID: <span id="operate_char_uuid"></span></li>
+					<li>Characteristic UUID: <span id="operate_char_uuid"class="uuidSize"></span></li>
 				</ul>
 
 				<!-- descriptors view -->
@@ -26,7 +26,7 @@
 				<ul id="des_tpl" style="display:none">
 			  		<li class="content">
 			  			<ul>
-							<li><b>UUID:</b><span dbField='uuid'></span></li>
+							<li><b>UUID:</b><span dbField='uuid' class="uuidSize"></span></li>
 							<li><b>Name:</b><span dbField='name'></span></li>
 							<li><b>Value(HEX):</b><span dbField='value_hex'></span></li>
 							<li><b>Value(ASCII):</b><span dbField='value_ascii'></span></li>
